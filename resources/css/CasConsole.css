@@ -1,0 +1,80 @@
+.cas-console {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 24px;
+}
+
+.cas-console__title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.cas-console__textarea {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    font-family: monospace;
+    font-size: 15px;
+    resize: vertical;
+}
+
+.cas-console__actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+
+.cas-console__button {
+    padding: 10px 16px;
+    cursor: pointer;
+}
+
+.cas-console__button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.cas-console__output {
+    margin-top: 24px;
+    padding: 16px;
+    min-height: 120px;
+    background: #111827;
+    color: #f9fafb;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.cas-console__history {
+    margin-top: 24px;
+}
+
+.cas-console__history-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 12px;
+}
+
+.cas-console__history-empty {
+    color: #6b7280;
+    margin: 0;
+}
+
+.cas-console__history-list {
+    padding-left: 24px;
+    margin: 0;
+}
+
+.cas-console__history-item {
+    margin-bottom: 8px;
+}
+
+.cas-console__history-item code {
+    display: inline-block;
+    max-width: 100%;
+    padding: 4px 6px;
+    background: #f3f4f6;
+    font-family: monospace;
+    overflow-wrap: anywhere;
+}
