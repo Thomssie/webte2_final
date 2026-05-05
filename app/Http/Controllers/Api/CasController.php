@@ -125,4 +125,88 @@ class CasController extends Controller
     }
 
 
+    public function logs(Request $request): JsonResponse
+    {
+        $limit = (int) $request->query('limit', 50);
+
+        if ($limit < 1) {
+            $limit = 1;
+        }
+
+        if ($limit > 200) {
+            $limit = 200;
+        }
+
+        $logs = CasLog::query()
+            ->latest()
+            ->limit($limit)
+            ->get([
+                'id',
+                'source',
+                'command',
+                'success',
+                'output',
+                'error_message',
+                'ip_address',
+                'created_at',
+            ]);
+
+        return response()->json([
+            'ok' => true,
+            'logs' => $logs,
+        ]);
+    }
+
+    public function exportLogs()
+    {
+        $fileName = 'cas_logs_' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ];
+
+        $columns = [
+            'id',
+            'created_at',
+            'source',
+            'command',
+            'success',
+            'output',
+            'error_message',
+            'ip_address',
+            'user_agent',
+        ];
+
+        $callback = function () use ($columns) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, $columns);
+
+            CasLog::query()
+                ->orderBy('created_at')
+                ->chunk(100, function ($logs) use ($file, $columns) {
+                    foreach ($logs as $log) {
+                        fputcsv($file, [
+                            $log->id,
+                            $log->created_at,
+                            $log->source,
+                            $log->command,
+                            $log->success ? 'true' : 'false',
+                            $log->output,
+                            $log->error_message,
+                            $log->ip_address,
+                            $log->user_agent,
+                        ]);
+                    }
+                });
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+
+
 }

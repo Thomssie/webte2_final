@@ -1,6 +1,10 @@
 import { Head } from '@inertiajs/react';
+import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useState } from 'react';
 import '../../css/CasConsole.css';
+import AppLayout from '../Layouts/AppLayout';
+import translations from '../translations.js';
+
 
 
 export default function CasConsole() {
@@ -8,6 +12,11 @@ export default function CasConsole() {
     const [output, setOutput] = useState('');
     const [loading, setLoading] = useState(false);
     const [history, setHistory] = useState([]);
+    const [language, setLanguage] = useState(
+        localStorage.getItem('app_language') || 'en'
+    );
+
+    const t = translations[language].casConsole;
 
 
     useEffect(() => {
@@ -16,8 +25,17 @@ export default function CasConsole() {
         }
 
         loadHistory();
-    }, []);
 
+        function handleLanguageChange(event) {
+            setLanguage(event.detail);
+        }
+
+        window.addEventListener('language-change', handleLanguageChange);
+
+        return () => {
+            window.removeEventListener('language-change', handleLanguageChange);
+        };
+    }, []);
 
     async function runCommand() {
         setLoading(true);
@@ -43,14 +61,14 @@ export default function CasConsole() {
             const data = await response.json();
 
             if (!response.ok) {
-                setOutput(data.error || data.message || 'Unknown error');
+                setOutput(data.error || data.message || t.unknownError);
                 return;
             }
 
-            setOutput(data.output || '(no output)');
+            setOutput(data.output || t.noOutput);
             await loadHistory();
         } catch (error) {
-            setOutput(error instanceof Error ? error.message : 'Request failed');
+            setOutput(error instanceof Error ? error.message : t.requestFailed);
         } finally {
             setLoading(false);
         }
@@ -75,14 +93,14 @@ export default function CasConsole() {
             const data = await response.json();
 
             if (!response.ok) {
-                setOutput(data.error || data.message || 'Reset failed');
+                setOutput(data.error || data.message || t.resetFailed);
                 return;
             }
 
-            setOutput(`Workspace reset. Deleted commands: ${data.deleted_count}`);
+            setOutput(`${t.workspaceReset} ${data.deleted_count}`);
             setHistory([]);
         } catch (error) {
-            setOutput(error instanceof Error ? error.message : 'Reset failed');
+            setOutput(error instanceof Error ? error.message : t.resetFailed);
         } finally {
             setLoading(false);
         }
@@ -91,7 +109,6 @@ export default function CasConsole() {
     function getSessionToken() {
         return localStorage.getItem('cas_session_token') || 'default-session';
     }
-
 
     async function loadHistory() {
         const response = await fetch('/api/cas/history', {
@@ -110,62 +127,108 @@ export default function CasConsole() {
         }
     }
 
+    async function downloadLogsCsv() {
+        try {
+            const response = await fetch('/api/cas/logs/export', {
+                method: 'GET',
+                headers: {
+                    'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
+                },
+            });
+
+            if (!response.ok) {
+                setOutput(t.csvExportFailed);
+                return;
+            }
+
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            link.href = downloadUrl;
+            link.download = 'cas_logs.csv';
+            document.body.appendChild(link);
+            link.click();
+
+            link.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            setOutput(error instanceof Error ? error.message : t.csvExportFailed);
+        }
+    }
+
+
+
 
 
     return (
-        <>
-            <Head title="CAS Console" />
+        <AppLayout>
+            <Head title={t.pageTitle} />
 
-            <main className="cas-console">
-                <h1 className="cas-console__title">CAS Console</h1>
+            <section className="cas-console">
+                <h1 className="cas-title">{t.pageTitle}</h1>
 
-                <textarea
-                    value={command}
-                    onChange={(event) => setCommand(event.target.value)}
-                    rows={8}
-                    className="cas-console__textarea"
-                />
+                <div className="cas-editor">
+                    <CodeMirror
+                        value={command}
+                        height="180px"
+                        basicSetup={{
+                            lineNumbers: true,
+                            foldGutter: false,
+                        }}
+                        onChange={(value) => setCommand(value)}
+                    />
+                </div>
 
-                <div className="cas-console__actions">
+                <div className="cas-actions">
                     <button
                         onClick={runCommand}
                         disabled={loading}
-                        className="cas-console__button"
+                        className="cas-button"
                     >
-                        {loading ? 'Running...' : 'Run command'}
+                        {loading ? t.running : t.runCommand}
                     </button>
 
                     <button
                         onClick={resetWorkspace}
                         disabled={loading}
-                        className="cas-console__button"
+                        className="cas-button"
                     >
-                        Reset workspace
+                        {t.resetWorkspace}
                     </button>
+
+                    <button
+                        onClick={downloadLogsCsv}
+                        disabled={loading}
+                        className="cas-button"
+                    >
+                        {t.downloadCsv}
+                    </button>
+
                 </div>
 
 
-                <pre className="cas-console__output">
+                <pre className="cas-output">
                     {output}
                 </pre>
 
-                <section className="cas-console__history">
-                    <h2 className="cas-console__history-title">History</h2>
+                <section className="cas-history">
+                    <h2 className="cas-history-title">{t.history}</h2>
 
                     {history.length === 0 ? (
-                        <p className="cas-console__history-empty">No commands yet.</p>
+                        <p className="cas-history-empty">{t.noCommands}</p>
                     ) : (
-                        <ol className="cas-console__history-list">
+                        <ol className="cas-history-list">
                             {history.map((item) => (
-                                <li key={item.sequence} className="cas-console__history-item">
+                                <li key={item.sequence} className="cas-history-item">
                                     <code>{item.command}</code>
                                 </li>
                             ))}
                         </ol>
                     )}
                 </section>
-            </main>
-        </>
+            </section>
+        </AppLayout>
     );
 
 }

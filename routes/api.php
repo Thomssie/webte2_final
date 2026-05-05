@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CasController;
 use App\Http\Middleware\ValidateApiKey;
+use App\Http\Controllers\Api\BallBeamController;
 
 
 
@@ -13,7 +14,13 @@ Route::middleware(ValidateApiKey::class)->group(function () {
     Route::post('/cas/execute', [CasController::class, 'execute']);
     Route::get('/cas/history', [CasController::class, 'history']);
     Route::post('/cas/history/reset', [CasController::class, 'resetHistory']);
+    Route::get('/cas/logs', [CasController::class, 'logs']);
+    Route::get('/cas/logs/export', [CasController::class, 'exportLogs']);
+    Route::post('/simulations/ball-beam', [BallBeamController::class, 'simulate']);
+
 });
+
+
 
 
 
