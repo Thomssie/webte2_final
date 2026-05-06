@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../../css/BallBeam.css';
 import AppLayout from '../Layouts/AppLayout';
 import translations from '../translations';
@@ -16,22 +16,23 @@ import {
 
 
 export default function BallBeam() {
+    const playbackSpeed = 0.3;
+
     const [language, setLanguage] = useState(
         localStorage.getItem('app_language') || 'en'
     );
 
     const [params, setParams] = useState({
         initialPosition: '-0.2',
-        initialVelocity: '0',
-        initialAngle: '0',
         targetPosition: '0',
-        duration: '8',
+        duration: '5',
     });
     const [simulationData, setSimulationData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [currentFrame, setCurrentFrame] = useState(0);
+    const [playbackTime, setPlaybackTime] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
+    const animationFrameRef = useRef(null);
 
     const t = translations[language].ballBeam;
 
@@ -52,33 +53,77 @@ export default function BallBeam() {
             return;
         }
 
-        const interval = setInterval(() => {
-            setCurrentFrame((frame) => {
-                if (frame >= simulationData.time.length - 1) {
-                    clearInterval(interval);
-                    setIsPlaying(false);
-                    return frame;
-                }
+        const simulationEndTime = simulationData.time[simulationData.time.length - 1];
+        const playbackStartedAt = performance.now() - (playbackTime / playbackSpeed) * 1000;
 
-                return frame + 1;
-            });
-        }, 50);
+        function updatePlayback(now) {
+            const nextPlaybackTime = Math.min(
+                ((now - playbackStartedAt) / 1000) * playbackSpeed,
+                simulationEndTime
+            );
 
-        return () => clearInterval(interval);
+            setPlaybackTime(nextPlaybackTime);
+
+            if (nextPlaybackTime >= simulationEndTime) {
+                setIsPlaying(false);
+                return;
+            }
+
+            animationFrameRef.current = requestAnimationFrame(updatePlayback);
+        }
+
+        animationFrameRef.current = requestAnimationFrame(updatePlayback);
+
+        return () => {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+        };
     }, [isPlaying, simulationData]);
 
     function updateParam(name, value) {
+        const normalizedValue = ['initialPosition', 'targetPosition'].includes(name)
+            ? normalizePositionValue(value)
+            : value;
+
         setParams((current) => ({
             ...current,
-            [name]: value,
+            [name]: normalizedValue,
         }));
+
+        if (!isPlaying) {
+            setSimulationData(null);
+            setPlaybackTime(0);
+        }
+    }
+
+    function normalizePositionValue(value) {
+        if (['', '-', '.', '-.'].includes(value)) {
+            return value;
+        }
+
+        const numericValue = Number(value);
+
+        if (!Number.isFinite(numericValue)) {
+            return value;
+        }
+
+        if (numericValue < -0.5) {
+            return '-0.5';
+        }
+
+        if (numericValue > 0.5) {
+            return '0.5';
+        }
+
+        return value;
     }
 
     async function runSimulation() {
         setLoading(true);
         setError('');
         setSimulationData(null);
-        setCurrentFrame(0);
+        setPlaybackTime(0);
         setIsPlaying(false);
 
         try {
@@ -91,8 +136,8 @@ export default function BallBeam() {
                 },
                 body: JSON.stringify({
                     initial_position: Number(params.initialPosition),
-                    initial_velocity: Number(params.initialVelocity),
-                    initial_angle: Number(params.initialAngle),
+                    initial_velocity: 0,
+                    initial_angle: 0,
                     target_position: Number(params.targetPosition),
                     duration: Number(params.duration),
                 }),
@@ -106,7 +151,7 @@ export default function BallBeam() {
             }
 
             setSimulationData(data);
-            setCurrentFrame(0);
+            setPlaybackTime(0);
             setIsPlaying(true);
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : t.simulationFailed);
@@ -128,29 +173,70 @@ export default function BallBeam() {
             return;
         }
 
-        setCurrentFrame(0);
+        setPlaybackTime(0);
         setIsPlaying(true);
     }
 
     const pointCount = simulationData?.time?.length || 0;
     const startPosition = pointCount > 0 ? simulationData.position[0] : null;
     const endPosition = pointCount > 0 ? simulationData.position[pointCount - 1] : null;
-    const currentPosition = simulationData?.position?.[currentFrame] ?? 0;
-    const currentAngle = simulationData?.angle?.[currentFrame] ?? 0;
+    const previewPosition = Number.isFinite(Number(params.initialPosition))
+        ? Number(params.initialPosition)
+        : 0;
+    const previewAngle = 0;
+    const currentTime = simulationData ? playbackTime : 0;
+    const nextFrameAfterCurrentTime = simulationData
+        ? simulationData.time.findIndex((time) => time > currentTime)
+        : -1;
+    const currentFrame = simulationData
+        ? nextFrameAfterCurrentTime === -1
+            ? pointCount - 1
+            : Math.max(0, nextFrameAfterCurrentTime - 1)
+        : 0;
+    const nextFrame = simulationData
+        ? Math.min(currentFrame + 1, pointCount - 1)
+        : 0;
+    const frameStartTime = simulationData?.time?.[currentFrame] ?? 0;
+    const frameEndTime = simulationData?.time?.[nextFrame] ?? frameStartTime;
+    const frameProgress = frameEndTime > frameStartTime
+        ? (currentTime - frameStartTime) / (frameEndTime - frameStartTime)
+        : 0;
+    const currentPosition = simulationData
+        ? simulationData.position[currentFrame]
+            + (simulationData.position[nextFrame] - simulationData.position[currentFrame]) * frameProgress
+        : previewPosition;
+    const currentAngle = simulationData
+        ? simulationData.angle[currentFrame]
+            + (simulationData.angle[nextFrame] - simulationData.angle[currentFrame]) * frameProgress
+        : previewAngle;
     const currentAngleDegrees = currentAngle * (180 / Math.PI);
-    const currentTime = simulationData?.time?.[currentFrame] ?? 0;
     const beamMin = -0.5;
     const beamMax = 0.5;
-    const ballPercent = ((currentPosition - beamMin) / (beamMax - beamMin)) * 100;
-    const normalizedBallPosition = Math.max(5, Math.min(95, ballPercent));
+    const beamEdgeInsetPercent = 14;
+    const ballPercent = beamEdgeInsetPercent
+        + ((currentPosition - beamMin) / (beamMax - beamMin)) * (100 - beamEdgeInsetPercent * 2);
+    const visualBallPosition = Math.max(-20, Math.min(120, ballPercent));
 
     const chartData = simulationData
-        ? simulationData.time.map((time, index) => ({
+        ? simulationData.time.slice(0, currentFrame + 1).map((time, index) => ({
             time,
             position: simulationData.position[index],
             angle: simulationData.angle[index],
-        }))
+        })).concat(
+            nextFrame > currentFrame && currentTime > frameStartTime
+                ? [{
+                    time: currentTime,
+                    position: currentPosition,
+                    angle: currentAngle,
+                }]
+                : []
+        )
         : [];
+    const chartEndTime = simulationData?.time?.[pointCount - 1] ?? 0;
+    const positionValues = simulationData?.position ?? [];
+    const minPosition = positionValues.length ? Math.min(...positionValues) : -0.5;
+    const maxPosition = positionValues.length ? Math.max(...positionValues) : 0.5;
+    const positionPadding = Math.max((maxPosition - minPosition) * 0.1, 0.05);
 
 
     return (
@@ -169,37 +255,28 @@ export default function BallBeam() {
                             <span>{t.initialPosition}</span>
                             <input
                                 type="number"
+                                min="-0.5"
+                                max="0.5"
+                                step="0.01"
                                 value={params.initialPosition}
+                                disabled={loading || isPlaying}
                                 onChange={(event) => updateParam('initialPosition', event.target.value)}
                             />
-                        </label>
-
-                        <label>
-                            <span>{t.initialVelocity}</span>
-                            <input
-                                type="number"
-                                value={params.initialVelocity}
-                                onChange={(event) => updateParam('initialVelocity', event.target.value)}
-                            />
-                        </label>
-
-                        <label>
-                            <span>{t.initialAngle}</span>
-                            <input
-                                type="number"
-                                value={params.initialAngle}
-                                onChange={(event) => updateParam('initialAngle', event.target.value)}
-                            />
+                            <small>{t.positionRangeHint}</small>
                         </label>
 
                         <label>
                             <span>{t.targetPosition}</span>
                             <input
                                 type="number"
+                                min="-0.5"
+                                max="0.5"
                                 step="0.01"
                                 value={params.targetPosition}
+                                disabled={loading || isPlaying}
                                 onChange={(event) => updateParam('targetPosition', event.target.value)}
                             />
+                            <small>{t.positionRangeHint}</small>
                         </label>
 
                         <label>
@@ -207,17 +284,18 @@ export default function BallBeam() {
                             <input
                                 type="number"
                                 value={params.duration}
+                                disabled={loading || isPlaying}
                                 onChange={(event) => updateParam('duration', event.target.value)}
                             />
                         </label>
 
-                        <button type="button" onClick={runSimulation} disabled={loading}>
+                        <button type="button" onClick={runSimulation} disabled={loading || isPlaying}>
                             {loading ? t.running : t.runSimulation}
                         </button>
                     </form>
 
                     <div className="simulation-results">
-                        <section className="simulation-panel">
+                        <section className="simulation-panel simulation-animation-panel">
                             <h2>{t.animation}</h2>
                             <div className="ball-beam-preview">
                                 <div
@@ -226,7 +304,7 @@ export default function BallBeam() {
                                 >
                                     <div
                                         className="beam-ball"
-                                        style={{ left: `${normalizedBallPosition}%` }}
+                                        style={{ left: `${visualBallPosition}%` }}
                                     />
                                 </div>
                             </div>
@@ -282,28 +360,41 @@ export default function BallBeam() {
                             )}
                         </section>
 
-                        <section className="simulation-panel">
-
-                            <h2>{t.graph}</h2>
-                            <ResponsiveContainer width="100%" height={240}>
-                                <LineChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="time" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Line type="monotone" dataKey="position" stroke="#57C4CE" dot={false} />
-                                    {simulationData && (
-                                        <ReferenceLine
-                                            x={currentTime}
-                                            stroke="#57C4CE"
-                                            strokeWidth={2}
-                                        />
-                                    )}
-                                </LineChart>
-                            </ResponsiveContainer>
-
-                        </section>
                     </div>
+
+                    <section className="simulation-panel simulation-graph-panel">
+                        <h2>{t.graph}</h2>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={chartData} margin={{ top: 8, right: 24, bottom: 8, left: 28 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis
+                                    dataKey="time"
+                                    type="number"
+                                    domain={[0, chartEndTime]}
+                                />
+                                <YAxis
+                                    width={72}
+                                    domain={[minPosition - positionPadding, maxPosition + positionPadding]}
+                                    tickFormatter={(value) => Number(value).toFixed(3)}
+                                />
+                                <Tooltip />
+                                <Line
+                                    type="monotone"
+                                    dataKey="position"
+                                    stroke="#57C4CE"
+                                    dot={false}
+                                    isAnimationActive={false}
+                                />
+                                {simulationData && (
+                                    <ReferenceLine
+                                        x={currentTime}
+                                        stroke="#57C4CE"
+                                        strokeWidth={2}
+                                    />
+                                )}
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </section>
                 </div>
             </section>
         </AppLayout>

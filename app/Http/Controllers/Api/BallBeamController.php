@@ -12,16 +12,16 @@ class BallBeamController extends Controller
     public function simulate(Request $request, OctaveService $octave): JsonResponse
     {
         $validated = $request->validate([
-            'initial_position' => ['required', 'numeric'],
-            'initial_velocity' => ['required', 'numeric'],
-            'initial_angle' => ['required', 'numeric'],
-            'target_position' => ['required', 'numeric'],
+            'initial_position' => ['required', 'numeric', 'min:-0.5', 'max:0.5'],
+            'initial_velocity' => ['sometimes', 'numeric'],
+            'initial_angle' => ['sometimes', 'numeric'],
+            'target_position' => ['required', 'numeric', 'min:-0.5', 'max:0.5'],
             'duration' => ['required', 'numeric', 'min:1', 'max:30'],
         ]);
 
         $initialPosition = (float) $validated['initial_position'];
-        $initialVelocity = (float) $validated['initial_velocity'];
-        $initialAngle = deg2rad((float) $validated['initial_angle']);
+        $initialVelocity = (float) ($validated['initial_velocity'] ?? 0);
+        $initialAngle = deg2rad((float) ($validated['initial_angle'] ?? 0));
         $targetPosition = (float) $validated['target_position'];
         $duration = (float) $validated['duration'];
 
@@ -40,11 +40,11 @@ D = [0];
 K = place(A,B,[-2+2i,-2-2i,-20,-80]);
 N = -inv(C*inv(A-B*K)*B);
 
-sys = ss(A-B*K,B,C,D);
+sys = ss(A-B*K,B*N,C,D);
 
 t = 0:0.01:{$duration};
 r = {$targetPosition};
-[y,t,x] = lsim(N*sys,r*ones(size(t)),t,[{$initialPosition};{$initialVelocity};{$initialAngle};0]);
+[y,t,x] = lsim(sys,r*ones(size(t)),t,[{$initialPosition};{$initialVelocity};{$initialAngle};0]);
 
 for i = 1:length(t)
     printf("%.5f,%.8f,%.8f\\n", t(i), y(i), x(i,3));
