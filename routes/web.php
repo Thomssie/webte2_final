@@ -12,6 +12,10 @@ Route::get('/cas', function () {
     return Inertia::render('CasConsole');
 })->name('cas.console');
 
+Route::get('/logs', function () {
+    return Inertia::render('Logs');
+})->name('logs');
+
 Route::get('/animations/ball-beam', function () {
     return Inertia::render('BallBeam');
 })->name('animations.ball-beam');

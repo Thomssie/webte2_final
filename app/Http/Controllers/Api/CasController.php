@@ -21,7 +21,7 @@ class CasController extends Controller
             'success' => true,
             'output' => 'CAS API is ready',
             'error_message' => null,
-            'ip_address' => $request->ip(),
+            'ip_address' => CasLog::hashIp($request->ip()),
             'user_agent' => $request->userAgent(),
         ]);
 
@@ -74,7 +74,7 @@ class CasController extends Controller
             'success' => $result['success'],
             'output' => $result['output'],
             'error_message' => $result['error'],
-            'ip_address' => $request->ip(),
+            'ip_address' => CasLog::hashIp($request->ip()),
             'user_agent' => $request->userAgent(),
         ]);
 
@@ -99,7 +99,7 @@ class CasController extends Controller
             'success' => true,
             'output' => "Deleted {$deletedCount} history commands.",
             'error_message' => null,
-            'ip_address' => $request->ip(),
+            'ip_address' => CasLog::hashIp($request->ip()),
             'user_agent' => $request->userAgent(),
         ]);
 
@@ -127,6 +127,29 @@ class CasController extends Controller
 
     public function logs(Request $request): JsonResponse
     {
+        $query = CasLog::query()->latest();
+
+        // Vrati vsetky logy bez limitu pre samostatnu stranku logov.
+        // Pouziva sa pri volani /api/cas/logs?all=1.
+        if ($request->boolean('all')) {
+            $logs = $query->get([
+                'id',
+                'source',
+                'command',
+                'success',
+                'output',
+                'error_message',
+                'ip_address',
+                'user_agent',
+                'created_at',
+            ]);
+
+            return response()->json([
+                'ok' => true,
+                'logs' => $logs,
+            ]);
+        }
+
         $limit = (int) $request->query('limit', 50);
 
         if ($limit < 1) {
@@ -137,8 +160,9 @@ class CasController extends Controller
             $limit = 200;
         }
 
-        $logs = CasLog::query()
-            ->latest()
+        // Vrati posledne logy s limitom pre bezne API volania.
+        // Pouziva sa pri volani /api/cas/logs bez parametra all.
+        $logs = $query
             ->limit($limit)
             ->get([
                 'id',
@@ -148,6 +172,7 @@ class CasController extends Controller
                 'output',
                 'error_message',
                 'ip_address',
+                'user_agent',
                 'created_at',
             ]);
 
@@ -174,7 +199,7 @@ class CasController extends Controller
             'success',
             'output',
             'error_message',
-            'ip_address',
+            'ip_hash',
             'user_agent',
         ];
 

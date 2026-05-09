@@ -127,40 +127,6 @@ export default function CasConsole() {
         }
     }
 
-    async function downloadLogsCsv() {
-        try {
-            const response = await fetch('/api/cas/logs/export', {
-                method: 'GET',
-                headers: {
-                    'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
-                },
-            });
-
-            if (!response.ok) {
-                setOutput(t.csvExportFailed);
-                return;
-            }
-
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-
-            link.href = downloadUrl;
-            link.download = 'cas_logs.csv';
-            document.body.appendChild(link);
-            link.click();
-
-            link.remove();
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            setOutput(error instanceof Error ? error.message : t.csvExportFailed);
-        }
-    }
-
-
-
-
-
     return (
         <AppLayout>
             <Head title={t.pageTitle} />
@@ -195,14 +161,6 @@ export default function CasConsole() {
                         className="cas-button"
                     >
                         {t.resetWorkspace}
-                    </button>
-
-                    <button
-                        onClick={downloadLogsCsv}
-                        disabled={loading}
-                        className="cas-button"
-                    >
-                        {t.downloadCsv}
                     </button>
 
                 </div>

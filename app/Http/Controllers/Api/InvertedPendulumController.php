@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\CasLog;
 use App\Services\OctaveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -59,6 +60,17 @@ endfor
 OCTAVE;
 
         $result = $octave->run($script);
+
+        // Kazde volanie Octave z animacie logujeme pre CSV export a kontrolu chyb.
+        CasLog::create([
+            'source' => 'simulation_inverted_pendulum',
+            'command' => $script,
+            'success' => $result['success'],
+            'output' => $result['output'],
+            'error_message' => $result['error'],
+            'ip_address' => CasLog::hashIp($request->ip()),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         if (! $result['success']) {
             return response()->json([
