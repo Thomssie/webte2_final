@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CasController;
 use App\Http\Middleware\ValidateApiKey;
 use App\Http\Controllers\Api\BallBeamController;
+use App\Http\Controllers\Api\InvertedPendulumController;
+
 
 
 
@@ -17,6 +19,8 @@ Route::middleware(ValidateApiKey::class)->group(function () {
     Route::get('/cas/logs', [CasController::class, 'logs']);
     Route::get('/cas/logs/export', [CasController::class, 'exportLogs']);
     Route::post('/simulations/ball-beam', [BallBeamController::class, 'simulate']);
+    Route::post('/simulations/inverted-pendulum', [InvertedPendulumController::class, 'simulate']);
+
 
 });
 

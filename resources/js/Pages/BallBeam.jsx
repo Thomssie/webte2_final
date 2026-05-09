@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import '../../css/BallBeam.css';
 import AppLayout from '../Layouts/AppLayout';
+import animationConfig from '../config/animation';
 import translations from '../translations';
 import {
     CartesianGrid,
@@ -14,9 +15,10 @@ import {
     YAxis,
 } from 'recharts';
 
-
+// Vykresluje stranku simulacie gulicky na tyci s formularom, animaciou a grafom.
+// Pouziva sa cez Inertia route /animations/ball-beam.
 export default function BallBeam() {
-    const playbackSpeed = 0.3;
+    const playbackSpeed = animationConfig.playbackSpeed;
 
     const [language, setLanguage] = useState(
         localStorage.getItem('app_language') || 'en'
@@ -37,6 +39,8 @@ export default function BallBeam() {
     const t = translations[language].ballBeam;
 
     useEffect(() => {
+        // Aktualizuje jazyk stranky po kliknuti na jazykovy prepinac v layout-e.
+        // Pouziva sa ako listener udalosti language-change v tomto useEffect-e.
         function handleLanguageChange(event) {
             setLanguage(event.detail);
         }
@@ -56,6 +60,8 @@ export default function BallBeam() {
         const simulationEndTime = simulationData.time[simulationData.time.length - 1];
         const playbackStartedAt = performance.now() - (playbackTime / playbackSpeed) * 1000;
 
+        // Pocita aktualny cas prehravania a ukonci animaciu po poslednom vypocitanom bode.
+        // Pouziva sa cez requestAnimationFrame v tomto useEffect-e.
         function updatePlayback(now) {
             const nextPlaybackTime = Math.min(
                 ((now - playbackStartedAt) / 1000) * playbackSpeed,
@@ -81,6 +87,8 @@ export default function BallBeam() {
         };
     }, [isPlaying, simulationData]);
 
+    // Uklada zmenu formularoveho parametra a resetuje stare vysledky simulacie.
+    // Pouziva sa v onChange handleroch formularovych inputov.
     function updateParam(name, value) {
         const normalizedValue = ['initialPosition', 'targetPosition'].includes(name)
             ? normalizePositionValue(value)
@@ -97,6 +105,8 @@ export default function BallBeam() {
         }
     }
 
+    // Oreze poziciu gulicky na povoleny rozsah tyce.
+    // Pouziva sa vo funkcii updateParam().
     function normalizePositionValue(value) {
         if (['', '-', '.', '-.'].includes(value)) {
             return value;
@@ -119,6 +129,8 @@ export default function BallBeam() {
         return value;
     }
 
+    // Odosle parametre simulacie na backend a ulozi vypocitane data pre animaciu a graf.
+    // Pouziva sa po kliknuti na tlacidlo spustenia simulacie.
     async function runSimulation() {
         setLoading(true);
         setError('');
@@ -160,6 +172,8 @@ export default function BallBeam() {
         }
     }
 
+    // Prepina prehravanie medzi stavmi prehrat a pozastavit.
+    // Pouziva sa po kliknuti na tlacidlo prehravania.
     function togglePlayback() {
         if (!simulationData) {
             return;
@@ -168,6 +182,8 @@ export default function BallBeam() {
         setIsPlaying((current) => !current);
     }
 
+    // Vrati prehravanie na zaciatok uz vypocitanej simulacie.
+    // Pouziva sa po kliknuti na tlacidlo restartovat.
     function restartPlayback() {
         if (!simulationData) {
             return;
@@ -178,13 +194,13 @@ export default function BallBeam() {
     }
 
     const pointCount = simulationData?.time?.length || 0;
-    const startPosition = pointCount > 0 ? simulationData.position[0] : null;
-    const endPosition = pointCount > 0 ? simulationData.position[pointCount - 1] : null;
     const previewPosition = Number.isFinite(Number(params.initialPosition))
         ? Number(params.initialPosition)
         : 0;
     const previewAngle = 0;
     const currentTime = simulationData ? playbackTime : 0;
+
+    // Najdeme dva susedne vypocitane body, medzi ktorymi sa aktualne prehravanie nachadza.
     const nextFrameAfterCurrentTime = simulationData
         ? simulationData.time.findIndex((time) => time > currentTime)
         : -1;
@@ -201,6 +217,8 @@ export default function BallBeam() {
     const frameProgress = frameEndTime > frameStartTime
         ? (currentTime - frameStartTime) / (frameEndTime - frameStartTime)
         : 0;
+
+    // Hodnoty medzi dvoma vypocitanymi bodmi interpolujeme, aby bol pohyb plynuly.
     const currentPosition = simulationData
         ? simulationData.position[currentFrame]
             + (simulationData.position[nextFrame] - simulationData.position[currentFrame]) * frameProgress
@@ -213,10 +231,13 @@ export default function BallBeam() {
     const beamMin = -0.5;
     const beamMax = 0.5;
     const beamEdgeInsetPercent = 14;
+
+    // Polohu gulicky v metroch prevedieme na percenta v ramci vizualnej tyce.
     const ballPercent = beamEdgeInsetPercent
         + ((currentPosition - beamMin) / (beamMax - beamMin)) * (100 - beamEdgeInsetPercent * 2);
     const visualBallPosition = Math.max(-20, Math.min(120, ballPercent));
 
+    // Graf zobrazuje iba data po aktualny cas prehravania a aktualny interpolovany bod.
     const chartData = simulationData
         ? simulationData.time.slice(0, currentFrame + 1).map((time, index) => ({
             time,
@@ -236,6 +257,8 @@ export default function BallBeam() {
     const positionValues = simulationData?.position ?? [];
     const minPosition = positionValues.length ? Math.min(...positionValues) : -0.5;
     const maxPosition = positionValues.length ? Math.max(...positionValues) : 0.5;
+
+    // Pridame odsadenie osi Y, aby ciara grafu nelezala priamo na okraji grafu.
     const positionPadding = Math.max((maxPosition - minPosition) * 0.1, 0.05);
 
 
@@ -329,7 +352,7 @@ export default function BallBeam() {
                                 <button
                                     type="button"
                                     onClick={restartPlayback}
-                                    disabled={!simulationData}
+                                    disabled={!simulationData || isPlaying}
                                 >
                                     {t.restart}
                                 </button>
@@ -337,26 +360,6 @@ export default function BallBeam() {
 
                             {error && (
                                 <p className="simulation-error">{error}</p>
-                            )}
-
-                            {simulationData && (
-                                <div className="simulation-summary">
-                                    <h3>{t.dataSummary}</h3>
-                                    <dl>
-                                        <div>
-                                            <dt>{t.dataPoints}</dt>
-                                            <dd>{pointCount}</dd>
-                                        </div>
-                                        <div>
-                                            <dt>{t.startPosition}</dt>
-                                            <dd>{startPosition?.toFixed(4)}</dd>
-                                        </div>
-                                        <div>
-                                            <dt>{t.endPosition}</dt>
-                                            <dd>{endPosition?.toFixed(4)}</dd>
-                                        </div>
-                                    </dl>
-                                </div>
                             )}
                         </section>
 

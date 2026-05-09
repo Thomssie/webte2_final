@@ -39,10 +39,15 @@ export default function Home() {
                         <p>{t.casDescription}</p>
                     </Link>
 
-                    <div className="home-card disabled">
-                        <h2>{t.animationsTitle}</h2>
-                        <p>{t.animationsDescription}</p>
-                    </div>
+                    <Link href="/animations/ball-beam" className="home-card">
+                        <h2>{t.ballBeamTitle}</h2>
+                        <p>{t.ballBeamDescription}</p>
+                    </Link>
+
+                    <Link href="/animations/inverted-pendulum" className="home-card">
+                        <h2>{t.invertedPendulumTitle}</h2>
+                        <p>{t.invertedPendulumDescription}</p>
+                    </Link>
 
                     <div className="home-card disabled">
                         <h2>{t.docsTitle}</h2>

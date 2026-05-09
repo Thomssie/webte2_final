@@ -1,0 +1,256 @@
+.pendulum-header {
+    margin-bottom: 28px;
+}
+
+.pendulum-header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--app-accent-dark);
+}
+
+.pendulum-header p {
+    margin: 10px 0 0;
+    max-width: 720px;
+    color: #4b5563;
+}
+
+.pendulum-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+}
+
+.pendulum-form {
+    display: grid;
+    gap: 14px;
+    align-self: start;
+    padding: 18px;
+    border: 1px solid rgba(87, 196, 206, 0.35);
+    background: #ffffff;
+    border-radius: 25px;
+}
+
+.pendulum-form label {
+    display: grid;
+    gap: 6px;
+}
+
+.pendulum-form span {
+    font-size: 14px;
+    color: #374151;
+}
+
+.pendulum-form small {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.pendulum-form input {
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 14px;
+}
+
+.pendulum-form button {
+    margin-top: 6px;
+    padding: 10px 16px;
+    border: 1px solid var(--app-accent);
+    border-radius: 25px;
+    background: var(--app-accent);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.pendulum-form button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.pendulum-form button:hover {
+    border-color: var(--app-accent-dark);
+    background: var(--app-accent-dark);
+}
+
+.pendulum-results {
+    display: grid;
+    gap: 20px;
+}
+
+.pendulum-graph-panel {
+    grid-column: 1 / -1;
+}
+
+.pendulum-panel {
+    padding: 18px;
+    border: 1px solid rgba(87, 196, 206, 0.35);
+    background: #ffffff;
+    border-radius: 25px;
+}
+
+.pendulum-panel h2 {
+    margin: 0 0 14px;
+    font-size: 20px;
+    color: var(--app-accent-dark);
+}
+
+.pendulum-preview {
+    position: relative;
+    min-height: 280px;
+    border-radius: 18px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+
+.pendulum-track {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 64px;
+    height: 6px;
+    border-radius: 999px;
+    background: #111827;
+}
+
+.pendulum-cart {
+    position: absolute;
+    bottom: 64px;
+    width: 64px;
+    height: 44px;
+    transform: translateX(-50%);
+}
+
+.cart-body {
+    position: absolute;
+    left: 0;
+    bottom: 10px;
+    width: 64px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--app-accent);
+    box-shadow: 0 8px 18px rgba(87, 196, 206, 0.35);
+}
+
+.cart-wheel {
+    position: absolute;
+    bottom: 0;
+    width: 15px;
+    height: 15px;
+    border: 3px solid #111827;
+    border-radius: 999px;
+    background: #ffffff;
+}
+
+.cart-wheel-left {
+    left: 9px;
+}
+
+.cart-wheel-right {
+    right: 9px;
+}
+
+.pendulum-rod {
+    position: absolute;
+    left: 50%;
+    bottom: 31px;
+    width: 5px;
+    background: #111827;
+    border-radius: 999px;
+    transform-origin: 50% 100%;
+}
+
+.pendulum-weight {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: #f97316;
+    transform: translateX(-50%);
+    box-shadow: 0 8px 18px rgba(249, 115, 22, 0.28);
+}
+
+.pendulum-live-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    color: #374151;
+    font-size: 14px;
+}
+
+.pendulum-live-values span {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--app-accent-soft);
+}
+
+.pendulum-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.pendulum-controls button {
+    padding: 8px 14px;
+    border: 1px solid var(--app-accent);
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--app-accent-dark);
+    cursor: pointer;
+}
+
+.pendulum-controls button:hover {
+    background: var(--app-accent-soft);
+}
+
+.pendulum-controls button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.pendulum-error {
+    margin: 14px 0 0;
+    color: #b91c1c;
+}
+
+.pendulum-summary {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 18px;
+    background: var(--app-accent-soft);
+}
+
+.pendulum-summary h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    color: var(--app-accent-dark);
+}
+
+.pendulum-summary dl {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.pendulum-summary div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.pendulum-summary dt {
+    color: #374151;
+}
+
+.pendulum-summary dd {
+    margin: 0;
+    font-weight: 700;
+}
+
+@media (max-width: 860px) {
+    .pendulum-layout {
+        grid-template-columns: 1fr;
+    }
+}
