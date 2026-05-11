@@ -7,12 +7,19 @@ use App\Models\CasLog;
 use App\Services\OctaveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Services\AnimationUsageService;
+use App\Services\IpGeolocationService;
 
 class BallBeamController extends Controller
 {
     // Spracuje poziadavku na vypocet simulacie gulicky na tyci cez Octave.
     // Pouziva sa v routes/api.php pre endpoint POST /api/simulations/ball-beam.
-    public function simulate(Request $request, OctaveService $octave): JsonResponse
+    public function simulate(
+        Request $request,
+        OctaveService $octave,
+        AnimationUsageService $usageService,
+        IpGeolocationService $geolocation
+    ): JsonResponse
     {
         $validated = $request->validate([
             'initial_position' => ['required', 'numeric', 'min:-0.5', 'max:0.5'],
@@ -64,7 +71,6 @@ OCTAVE;
             'output' => $result['output'],
             'error_message' => $result['error'],
             'ip_address' => CasLog::hashIp($request->ip()),
-            'user_agent' => $request->userAgent(),
         ]);
 
         if (! $result['success']) {
@@ -97,11 +103,20 @@ OCTAVE;
             $angle[] = (float) $values[2];
         }
 
-        return response()->json([
+        $response = response()->json([
             'ok' => true,
             'time' => $time,
             'position' => $position,
             'angle' => $angle,
         ]);
+
+        $cookie = $usageService->record($request, 'ball_beam', $geolocation);
+
+        if ($cookie) {
+            $response->withCookie($cookie);
+        }
+
+        return $response;
+
     }
 }

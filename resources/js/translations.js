@@ -91,6 +91,24 @@ const translations = {
             restart: 'Restart',
             simulationFailed: 'Simulation failed.',
         },
+        statisticsPage: {
+            pageTitle: 'Animation Statistics',
+            intro: 'Usage counts and details for each animation.',
+            ballBeam: 'Ball and Beam',
+            invertedPendulum: 'Inverted Pendulum',
+            uses: 'Uses',
+            details: 'Details',
+            hideDetails: 'Hide details',
+            refresh: 'Refresh',
+            loading: 'Loading...',
+            noRecords: 'No records yet.',
+            usedAt: 'Used at',
+            location: 'Location',
+            unknownLocation: 'Unknown location',
+            loadFailed: 'Failed to load statistics.',
+        },
+
+
     },
     sk: {
         navigation: {
@@ -184,6 +202,23 @@ const translations = {
             restart: 'Reštartovať',
             simulationFailed: 'Simulácia zlyhala.',
         },
+        statisticsPage: {
+            pageTitle: 'Štatistiky animácií',
+            intro: 'Počty použití a detaily pre každú animáciu.',
+            ballBeam: 'Gulička na tyči',
+            invertedPendulum: 'Inverzné kyvadlo',
+            uses: 'Použitia',
+            details: 'Detaily',
+            hideDetails: 'Skryť detaily',
+            refresh: 'Obnoviť',
+            loading: 'Načítavam...',
+            noRecords: 'Zatiaľ žiadne záznamy.',
+            usedAt: 'Použité',
+            location: 'Lokalita',
+            unknownLocation: 'Neznáma lokalita',
+            loadFailed: 'Nepodarilo sa načítať štatistiky.',
+        },
+
     },
 };
 

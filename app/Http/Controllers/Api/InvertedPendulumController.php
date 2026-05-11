@@ -7,12 +7,19 @@ use App\Models\CasLog;
 use App\Services\OctaveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Services\AnimationUsageService;
+use App\Services\IpGeolocationService;
 
 class InvertedPendulumController extends Controller
 {
     // Spracuje poziadavku na vypocet simulacie inverzneho kyvadla cez Octave.
     // Pouziva sa v routes/api.php pre endpoint POST /api/simulations/inverted-pendulum.
-    public function simulate(Request $request, OctaveService $octave): JsonResponse
+    public function simulate(
+        Request $request,
+        OctaveService $octave,
+        AnimationUsageService $usageService,
+        IpGeolocationService $geolocation
+    ): JsonResponse
     {
         $validated = $request->validate([
             'initial_position' => ['required', 'numeric', 'min:-2', 'max:2'],
@@ -69,7 +76,6 @@ OCTAVE;
             'output' => $result['output'],
             'error_message' => $result['error'],
             'ip_address' => CasLog::hashIp($request->ip()),
-            'user_agent' => $request->userAgent(),
         ]);
 
         if (! $result['success']) {
@@ -102,11 +108,20 @@ OCTAVE;
             $angle[] = (float) $values[2];
         }
 
-        return response()->json([
+        $response = response()->json([
             'ok' => true,
             'time' => $time,
             'position' => $position,
             'angle' => $angle,
         ]);
+
+        $cookie = $usageService->record($request, 'inverted_pendulum', $geolocation);
+
+        if ($cookie) {
+            $response->withCookie($cookie);
+        }
+
+        return $response;
+
     }
 }

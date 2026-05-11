@@ -6,4 +6,7 @@ return [
     'timeout_seconds' => (int) env('CAS_TIMEOUT_SECONDS', 10),
     'slowdown_ms' => (int) env('CAS_SLOWDOWN_MS', 0),
     'animation_stats_interval_minutes' => (int) env('ANIMATION_STATS_INTERVAL_MINUTES', 10),
+    'geolocation_enabled' => (bool) env('GEOLOCATION_ENABLED', true),
+    'geolocation_timeout_seconds' => (int) env('GEOLOCATION_TIMEOUT_SECONDS', 3),
+
 ];

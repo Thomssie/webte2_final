@@ -22,7 +22,6 @@ class CasController extends Controller
             'output' => 'CAS API is ready',
             'error_message' => null,
             'ip_address' => CasLog::hashIp($request->ip()),
-            'user_agent' => $request->userAgent(),
         ]);
 
         return response()->json([
@@ -75,7 +74,6 @@ class CasController extends Controller
             'output' => $result['output'],
             'error_message' => $result['error'],
             'ip_address' => CasLog::hashIp($request->ip()),
-            'user_agent' => $request->userAgent(),
         ]);
 
         return response()->json([
@@ -100,7 +98,6 @@ class CasController extends Controller
             'output' => "Deleted {$deletedCount} history commands.",
             'error_message' => null,
             'ip_address' => CasLog::hashIp($request->ip()),
-            'user_agent' => $request->userAgent(),
         ]);
 
         return response()->json([
@@ -140,7 +137,6 @@ class CasController extends Controller
                 'output',
                 'error_message',
                 'ip_address',
-                'user_agent',
                 'created_at',
             ]);
 
@@ -172,7 +168,6 @@ class CasController extends Controller
                 'output',
                 'error_message',
                 'ip_address',
-                'user_agent',
                 'created_at',
             ]);
 
@@ -200,7 +195,6 @@ class CasController extends Controller
             'output',
             'error_message',
             'ip_hash',
-            'user_agent',
         ];
 
         $callback = function () use ($columns) {
@@ -221,7 +215,6 @@ class CasController extends Controller
                             $log->output,
                             $log->error_message,
                             $log->ip_address,
-                            $log->user_agent,
                         ]);
                     }
                 });

@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\CasController;
 use App\Http\Middleware\ValidateApiKey;
 use App\Http\Controllers\Api\BallBeamController;
 use App\Http\Controllers\Api\InvertedPendulumController;
+use App\Http\Controllers\Api\StatisticsController;
+
 
 
 
@@ -20,6 +22,8 @@ Route::middleware(ValidateApiKey::class)->group(function () {
     Route::get('/cas/logs/export', [CasController::class, 'exportLogs']);
     Route::post('/simulations/ball-beam', [BallBeamController::class, 'simulate']);
     Route::post('/simulations/inverted-pendulum', [InvertedPendulumController::class, 'simulate']);
+    Route::get('/statistics/animations', [StatisticsController::class, 'summary']);
+    Route::get('/statistics/animations/{animationType}', [StatisticsController::class, 'details']);
 
 
 });

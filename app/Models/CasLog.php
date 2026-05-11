@@ -13,7 +13,6 @@ class CasLog extends Model
         'output',
         'error_message',
         'ip_address',
-        'user_agent',
     ];
 
     protected $casts = [

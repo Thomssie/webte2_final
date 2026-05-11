@@ -36,7 +36,7 @@ export default function AppLayout({ children }) {
                     <Link href="/animations/inverted-pendulum">{t.invertedPendulum}</Link>
                     <Link href="/logs">{t.logs}</Link>
                     <span>{t.apiDocs}</span>
-                    <span>{t.statistics}</span>
+                    <Link href="/statistics">{t.statistics}</Link>
                 </nav>
 
                 <div className="language-switch">
