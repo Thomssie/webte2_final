@@ -1,0 +1,67 @@
+.api-docs-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.api-docs-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 900px;
+}
+
+.api-docs-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 2rem;
+}
+
+.api-docs-header p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.api-docs-header a {
+    color: #1d4ed8;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.api-docs-header a:hover {
+    text-decoration: underline;
+}
+
+.api-docs-viewer {
+    overflow: hidden;
+    border: 1px solid #dbe4f0;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.api-docs-viewer .swagger-ui {
+    font-family: inherit;
+}
+
+.api-docs-viewer .swagger-ui .info {
+    margin: 24px 0;
+}
+
+.api-docs-viewer .swagger-ui .scheme-container {
+    padding: 18px 24px;
+    box-shadow: none;
+}
+
+@media (max-width: 720px) {
+    .api-docs-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .api-docs-viewer {
+        margin-inline: -12px;
+        border-right: 0;
+        border-left: 0;
+        border-radius: 0;
+    }
+}

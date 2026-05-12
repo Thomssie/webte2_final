@@ -35,7 +35,7 @@ export default function AppLayout({ children }) {
                     <Link href="/animations/ball-beam">{t.ballBeam}</Link>
                     <Link href="/animations/inverted-pendulum">{t.invertedPendulum}</Link>
                     <Link href="/logs">{t.logs}</Link>
-                    <span>{t.apiDocs}</span>
+                    <Link href="/api-docs">{t.apiDocs}</Link>
                     <Link href="/statistics">{t.statistics}</Link>
                 </nav>
 

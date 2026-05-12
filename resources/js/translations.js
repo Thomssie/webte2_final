@@ -107,6 +107,10 @@ const translations = {
             unknownLocation: 'Unknown location',
             loadFailed: 'Failed to load statistics.',
         },
+        apiDocsPage: {
+            pageTitle: 'API Documentation',
+            intro: 'OpenAPI documentation for all backend API endpoints used by the application.',
+        },
 
 
     },
@@ -217,6 +221,10 @@ const translations = {
             location: 'Lokalita',
             unknownLocation: 'Neznáma lokalita',
             loadFailed: 'Nepodarilo sa načítať štatistiky.',
+        },
+        apiDocsPage: {
+            pageTitle: 'API dokumentácia',
+            intro: 'OpenAPI dokumentácia pre všetky koncové body backendového API použité v aplikácii.',
         },
 
     },

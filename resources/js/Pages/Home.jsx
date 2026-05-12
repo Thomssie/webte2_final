@@ -49,10 +49,10 @@ export default function Home() {
                         <p>{t.invertedPendulumDescription}</p>
                     </Link>
 
-                    <div className="home-card disabled">
+                    <Link href="/api-docs" className="home-card">
                         <h2>{t.docsTitle}</h2>
                         <p>{t.docsDescription}</p>
-                    </div>
+                    </Link>
                 </div>
             </section>
         </AppLayout>

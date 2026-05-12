@@ -7,9 +7,7 @@
         "dev": "vite"
     },
     "devDependencies": {
-        "@headlessui/react": "^2.0.0",
         "@inertiajs/react": "^2.0.0",
-        "@tailwindcss/forms": "^0.5.3",
         "@tailwindcss/vite": "^4.0.0",
         "@vitejs/plugin-react": "^4.2.0",
         "autoprefixer": "^10.4.12",
@@ -24,6 +22,7 @@
     },
     "dependencies": {
         "@uiw/react-codemirror": "^4.25.9",
-        "recharts": "^3.8.1"
+        "recharts": "^3.8.1",
+        "swagger-ui-dist": "^5.32.6"
     }
 }
