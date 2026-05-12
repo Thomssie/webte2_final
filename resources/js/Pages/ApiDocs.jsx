@@ -32,10 +32,10 @@ export default function ApiDocs() {
             swaggerElement.innerHTML = '';
         }
 
-        // Swagger UI nacita OpenAPI JSON v aktualnom jazyku a vykresli vsetky API metody.
+        // Swagger UI nacita OpenAPI JSON vygenerovany Scramble z Laravel rout.
         SwaggerUI({
             dom_id: '#swagger-ui',
-            url: `/openapi.json?lang=${language}`,
+            url: '/openapi.json',
             deepLinking: true,
             docExpansion: 'list',
             defaultModelsExpandDepth: 1,
@@ -51,6 +51,14 @@ export default function ApiDocs() {
                 <div className="api-docs-header">
                     <h1>{t.pageTitle}</h1>
                     <p>{t.intro}</p>
+                    <a
+                        className="api-docs-pdf-link"
+                        href="/api-docs/pdf"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        {t.downloadPdf}
+                    </a>
                 </div>
 
                 <div id="swagger-ui" className="api-docs-viewer" />

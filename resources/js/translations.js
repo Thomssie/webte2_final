@@ -110,6 +110,7 @@ const translations = {
         apiDocsPage: {
             pageTitle: 'API Documentation',
             intro: 'OpenAPI documentation for all backend API endpoints used by the application.',
+            downloadPdf: 'Download PDF documentation',
         },
 
 
@@ -225,6 +226,7 @@ const translations = {
         apiDocsPage: {
             pageTitle: 'API dokumentácia',
             intro: 'OpenAPI dokumentácia pre všetky koncové body backendového API použité v aplikácii.',
+            downloadPdf: 'Stiahnuť PDF dokumentáciu',
         },
 
     },

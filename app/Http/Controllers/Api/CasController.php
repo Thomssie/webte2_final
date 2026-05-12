@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CasLog;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\HeaderParameter;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use App\Services\OctaveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,8 +15,12 @@ use App\Models\CasCommandHistory;
 
 
 
+// Metadata pre Scramble zaradia CAS endpointy do spolocnej sekcie dokumentacie.
+#[Group('CAS', 'CAS prikazy v Octave, historia a logy')]
 class CasController extends Controller
 {
+    // Endpoint overi dostupnost CAS API a zapise kontrolny log.
+    #[Endpoint(title: 'Overenie dostupnosti CAS API', description: 'Vrati informaciu, ci je CAS API pripravene na spracovanie poziadaviek.')]
     public function ping(Request $request): JsonResponse
     {
         CasLog::create([
@@ -31,6 +39,9 @@ class CasController extends Controller
     }
 
 
+    // Endpoint spusti prikaz v Octave a pouzije historiu prikazov aktualnej relacie.
+    #[Endpoint(title: 'Spustenie prikazu v Octave', description: 'Spusti prikaz spolu s historiou aktualnej relacie, aby bolo mozne pouzivat pomocne premenne.')]
+    #[HeaderParameter('X-Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
     public function execute(Request $request, OctaveService $octave): JsonResponse
     {
         $validated = $request->validate([
@@ -85,6 +96,9 @@ class CasController extends Controller
         ], $result['success'] ? 200 : 422);
     }
 
+    // Endpoint vymaze historiu prikazov pre aktualnu CAS relaciu.
+    #[Endpoint(title: 'Vymazanie historie aktualnej relacie', description: 'Odstrani ulozene prikazy patriace k zadanemu session tokenu.')]
+    #[HeaderParameter('X-Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
     public function resetHistory(Request $request): JsonResponse
     {
         $sessionToken = (string) $request->header('X-Session-Token', 'default-session');
@@ -107,6 +121,9 @@ class CasController extends Controller
     }
 
 
+    // Endpoint vrati prikazy ulozene v historii aktualnej CAS relacie.
+    #[Endpoint(title: 'Zoznam prikazov v historii relacie', description: 'Vrati prikazy ulozene pod zadanym session tokenom v poradi ich vykonania.')]
+    #[HeaderParameter('X-Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
     public function history(Request $request): JsonResponse
     {
         $sessionToken = (string) $request->header('X-Session-Token', 'default-session');
@@ -122,6 +139,10 @@ class CasController extends Controller
     }
 
 
+    // Endpoint vrati CAS logy bud s limitom, alebo kompletne pri parametri all.
+    #[Endpoint(title: 'Zoznam logov CAS poziadaviek', description: 'Vrati logy poziadaviek spracovanych cez CAS a simulacne endpointy.')]
+    #[QueryParameter('all', description: 'Ak je true, vrati vsetky logy bez limitu.', required: false, type: 'bool')]
+    #[QueryParameter('limit', description: 'Maximalny pocet logov pri beznom vypise.', required: false, type: 'int', default: 50)]
     public function logs(Request $request): JsonResponse
     {
         $query = CasLog::query()->latest();
@@ -177,6 +198,8 @@ class CasController extends Controller
         ]);
     }
 
+    // Endpoint exportuje CAS logy do CSV suboru.
+    #[Endpoint(title: 'Export logov do CSV', description: 'Vrati CSV subor so vsetkymi ulozenymi CAS logmi.')]
     public function exportLogs()
     {
         $fileName = 'cas_logs_' . now()->format('Y-m-d_H-i-s') . '.csv';

@@ -13,7 +13,7 @@
 
 .api-docs-header h1 {
     margin: 0;
-    color: #0f172a;
+    color: var(--app-accent-dark);
     font-size: 2rem;
 }
 
@@ -23,19 +23,26 @@
     line-height: 1.6;
 }
 
-.api-docs-header a {
-    color: #1d4ed8;
+.api-docs-pdf-link {
+    width: fit-content;
+    padding: 9px 14px;
+    border: 1px solid var(--app-accent);
+    border-radius: 6px;
+    background: var(--app-accent);
+    color: #ffffff;
     font-weight: 700;
     text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.api-docs-header a:hover {
-    text-decoration: underline;
+.api-docs-pdf-link:hover {
+    background: var(--app-accent-dark);
+    border-color: var(--app-accent-dark);
 }
 
 .api-docs-viewer {
     overflow: hidden;
-    border: 1px solid #dbe4f0;
+    border: 1px solid rgba(87, 196, 206, 0.35);
     border-radius: 8px;
     background: #ffffff;
 }

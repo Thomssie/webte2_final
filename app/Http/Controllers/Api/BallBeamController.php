@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CasLog;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use App\Services\OctaveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\AnimationUsageService;
 use App\Services\IpGeolocationService;
 
+// Metadata pre Scramble zaradia simulacny endpoint do sekcie simulacii.
+#[Group('Simulations', 'Vypocty dat pre synchronizovane animacie')]
 class BallBeamController extends Controller
 {
     // Spracuje poziadavku na vypocet simulacie gulicky na tyci cez Octave.
     // Pouziva sa v routes/api.php pre endpoint POST /api/simulations/ball-beam.
+    #[Endpoint(title: 'Vypocet simulacie gulicky na tyci', description: 'Vrati cas, polohu a uhol pre animaciu gulicky na tyci.')]
     public function simulate(
         Request $request,
         OctaveService $octave,

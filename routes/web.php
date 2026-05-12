@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\OpenApiController;
+use App\Http\Controllers\ApiDocumentationPdfController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -34,3 +35,5 @@ Route::get('/api-docs', function () {
 })->name('api.docs');
 
 Route::get('/openapi.json', OpenApiController::class)->name('openapi.json');
+
+Route::get('/api-docs/pdf', ApiDocumentationPdfController::class)->name('api.docs.pdf');
