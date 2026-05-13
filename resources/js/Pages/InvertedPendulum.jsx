@@ -295,7 +295,7 @@ export default function InvertedPendulum() {
             <section className="pendulum-page">
                 <div className="pendulum-header">
                     <h1>{t.pageTitle}</h1>
-                    <p>{t.intro}</p>
+                    {/*<p>{t.intro}</p>*/}
                 </div>
 
                 <div className="pendulum-layout">

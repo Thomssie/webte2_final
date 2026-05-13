@@ -271,7 +271,7 @@ export default function BallBeam() {
             <section className="simulation-page">
                 <div className="simulation-header">
                     <h1>{t.pageTitle}</h1>
-                    <p>{t.intro}</p>
+                    {/*<p>{t.intro}</p>*/}
                 </div>
 
                 <div className="simulation-layout">

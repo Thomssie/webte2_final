@@ -17,7 +17,7 @@ class ValidateApiKey
     {
 
         $configuredKey = config('cas.api_key');
-        $providedKey = (string) $request->header('X-API-Key');
+        $providedKey = (string) $request->header('API-KEY');
 
         if ($configuredKey === '' || ! hash_equals($configuredKey, $providedKey)) {
             return response()->json([

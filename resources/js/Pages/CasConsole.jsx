@@ -54,7 +54,7 @@ export default function CasConsole() {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
                     'X-CSRF-TOKEN': getCsrfToken(),
-                    'X-Session-Token': sessionToken,
+                    'Session-Token': sessionToken,
                 },
                 body: JSON.stringify({
                     command,
@@ -90,7 +90,7 @@ export default function CasConsole() {
                 headers: {
                     Accept: 'application/json',
                     'X-CSRF-TOKEN': getCsrfToken(),
-                    'X-Session-Token': sessionToken,
+                    'Session-Token': sessionToken,
                 },
             });
 
@@ -119,7 +119,7 @@ export default function CasConsole() {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
-                'X-Session-Token': getSessionToken(),
+                'Session-Token': getSessionToken(),
             },
         });
 

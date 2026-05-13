@@ -43,11 +43,11 @@ class AppServiceProvider extends ServiceProvider
             return str_starts_with($route->uri(), 'api/');
         });
 
-        // Vsetky API endpointy su chranene rovnakym X-API-Key headerom.
+        // Vsetky API endpointy su chranene rovnakym API-Key headerom.
         // Security scheme sa doplni do vygenerovanej OpenAPI specifikacie aj do PDF exportu.
         Scramble::afterOpenApiGenerated(function (OpenApi $openApi): void {
             $openApi->secure(
-                SecurityScheme::apiKey('header', 'X-API-Key')
+                SecurityScheme::apiKey('header', 'API-Key')
                     ->as('ApiKeyAuth')
                     ->setDescription('API kluc definovany v konfiguracii aplikacie.')
             );

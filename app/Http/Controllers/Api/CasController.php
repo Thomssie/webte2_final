@@ -12,6 +12,7 @@ use App\Services\OctaveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\CasCommandHistory;
+use Illuminate\Support\Str;
 
 
 
@@ -41,7 +42,7 @@ class CasController extends Controller
 
     // Endpoint spusti prikaz v Octave a pouzije historiu prikazov aktualnej relacie.
     #[Endpoint(title: 'Spustenie prikazu v Octave', description: 'Spusti prikaz spolu s historiou aktualnej relacie, aby bolo mozne pouzivat pomocne premenne.')]
-    #[HeaderParameter('X-Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
+    #[HeaderParameter('Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
     public function execute(Request $request, OctaveService $octave): JsonResponse
     {
         $validated = $request->validate([
@@ -49,7 +50,7 @@ class CasController extends Controller
             'source' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $sessionToken = (string) $request->header('X-Session-Token', 'default-session');
+        $sessionToken = (string) $request->header('Session-Token', 'default-session');
         $command = $validated['command'];
         $source = $validated['source'] ?? 'form';
 
@@ -62,9 +63,26 @@ class CasController extends Controller
             return rtrim($historyCommand, " \t\n\r\0\x0B;") . ';';
         }, $historyCommands);
 
-        $script = implode("\n", array_merge($silentHistoryCommands, [$command]));
+        $outputMarker = '__CURRENT_OUTPUT_START_' . str_replace('-', '_', (string) Str::uuid()) . '__';
+
+        $script = implode("\n", array_merge(
+            $silentHistoryCommands,
+            ["disp('{$outputMarker}');", $command]
+        ));
 
         $result = $octave->run($script);
+
+        if ($result['success']) {
+            $markerPosition = strpos($result['output'], $outputMarker);
+
+            if ($markerPosition !== false) {
+                $result['output'] = trim(substr(
+                    $result['output'],
+                    $markerPosition + strlen($outputMarker)
+                ));
+            }
+        }
+
 
         if ($result['success']) {
             $nextSequence = CasCommandHistory::where('session_token', $sessionToken)->max('sequence') + 1;
@@ -98,10 +116,10 @@ class CasController extends Controller
 
     // Endpoint vymaze historiu prikazov pre aktualnu CAS relaciu.
     #[Endpoint(title: 'Vymazanie historie aktualnej relacie', description: 'Odstrani ulozene prikazy patriace k zadanemu session tokenu.')]
-    #[HeaderParameter('X-Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
+    #[HeaderParameter('Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
     public function resetHistory(Request $request): JsonResponse
     {
-        $sessionToken = (string) $request->header('X-Session-Token', 'default-session');
+        $sessionToken = (string) $request->header('Session-Token', 'default-session');
 
         $deletedCount = CasCommandHistory::where('session_token', $sessionToken)->delete();
 
@@ -123,10 +141,10 @@ class CasController extends Controller
 
     // Endpoint vrati prikazy ulozene v historii aktualnej CAS relacie.
     #[Endpoint(title: 'Zoznam prikazov v historii relacie', description: 'Vrati prikazy ulozene pod zadanym session tokenom v poradi ich vykonania.')]
-    #[HeaderParameter('X-Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
+    #[HeaderParameter('Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
     public function history(Request $request): JsonResponse
     {
-        $sessionToken = (string) $request->header('X-Session-Token', 'default-session');
+        $sessionToken = (string) $request->header('Session-Token', 'default-session');
 
         $commands = CasCommandHistory::where('session_token', $sessionToken)
             ->orderBy('sequence')
