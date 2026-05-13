@@ -6,6 +6,7 @@ use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,6 +26,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Pri nasadeni v podadresari musi Laravel generovat URL podla APP_URL.
+        if (config('app.url')) {
+            URL::forceRootUrl(config('app.url'));
+        }
+
+        // Produkcny server bezi za HTTPS Nginx konfiguraciou.
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
 
         // Scramble dokumentuje iba skutocne backend API routy z routes/api.php.
         // Bez tejto filtracie by sa do OpenAPI dostali aj web routy zacinajuce na api-docs.

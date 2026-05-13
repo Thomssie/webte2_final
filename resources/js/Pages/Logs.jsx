@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import '../../css/CasConsole.css';
 import AppLayout from '../Layouts/AppLayout';
 import translations from '../translations';
+import { appUrl } from '../url';
 
 // Vykresluje stranku na stiahnutie CAS logov do CSV.
 // Pouziva sa cez Inertia route /logs.
@@ -34,7 +35,7 @@ export default function Logs() {
         setError('');
 
         try {
-            const response = await fetch('/web/cas/logs/export', {
+            const response = await fetch(appUrl('/web/cas/logs/export'), {
                 method: 'GET',
             });
 

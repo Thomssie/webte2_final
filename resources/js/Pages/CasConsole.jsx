@@ -7,6 +7,7 @@ import translations from '../translations.js';
 import { StreamLanguage } from '@codemirror/language';
 import { octave } from '@codemirror/legacy-modes/mode/octave';
 import { getCsrfToken } from '../csrf.js';
+import { appUrl } from '../url.js';
 
 
 
@@ -47,7 +48,7 @@ export default function CasConsole() {
         const sessionToken = localStorage.getItem('cas_session_token') || 'default-session';
 
         try {
-            const response = await fetch('/web/cas/execute', {
+            const response = await fetch(appUrl('/web/cas/execute'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ export default function CasConsole() {
         const sessionToken = localStorage.getItem('cas_session_token') || 'default-session';
 
         try {
-            const response = await fetch('/web/cas/history/reset', {
+            const response = await fetch(appUrl('/web/cas/history/reset'), {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -114,7 +115,7 @@ export default function CasConsole() {
     }
 
     async function loadHistory() {
-        const response = await fetch('/web/cas/history', {
+        const response = await fetch(appUrl('/web/cas/history'), {
             method: 'GET',
             headers: {
                 Accept: 'application/json',

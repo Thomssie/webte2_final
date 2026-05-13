@@ -5,6 +5,7 @@ import AppLayout from '../Layouts/AppLayout';
 import animationConfig from '../config/animation';
 import { getCsrfToken } from '../csrf';
 import translations from '../translations';
+import { appUrl } from '../url';
 import {
     CartesianGrid,
     Line,
@@ -140,7 +141,7 @@ export default function BallBeam() {
         setIsPlaying(false);
 
         try {
-            const response = await fetch('/web/simulations/ball-beam', {
+            const response = await fetch(appUrl('/web/simulations/ball-beam'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

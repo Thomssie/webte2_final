@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import '../../css/Statistics.css';
 import AppLayout from '../Layouts/AppLayout';
 import translations from '../translations';
+import { appUrl } from '../url';
 
 const animationLabels = {
     ball_beam: {
@@ -69,7 +70,7 @@ export default function Statistics() {
         setError('');
 
         try {
-            const response = await fetch('/web/statistics/animations', {
+            const response = await fetch(appUrl('/web/statistics/animations'), {
                 method: 'GET',
                 headers: {
                     Accept: 'application/json',
@@ -107,7 +108,7 @@ export default function Statistics() {
         setError('');
 
         try {
-            const response = await fetch(`/web/statistics/animations/${animationType}`, {
+            const response = await fetch(appUrl(`/web/statistics/animations/${animationType}`), {
                 method: 'GET',
                 headers: {
                     Accept: 'application/json',

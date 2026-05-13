@@ -5,6 +5,7 @@ import AppLayout from '../Layouts/AppLayout';
 import animationConfig from '../config/animation';
 import { getCsrfToken } from '../csrf';
 import translations from '../translations';
+import { appUrl } from '../url';
 import {
     CartesianGrid,
     Line,
@@ -150,7 +151,7 @@ export default function InvertedPendulum() {
         setIsPlaying(false);
 
         try {
-            const response = await fetch('/web/simulations/inverted-pendulum', {
+            const response = await fetch(appUrl('/web/simulations/inverted-pendulum'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,10 +1,10 @@
 import { Head } from '@inertiajs/react';
 import SwaggerUI from 'swagger-ui-dist/swagger-ui-es-bundle.js';
-import 'swagger-ui-dist/swagger-ui.css';
 import { useEffect, useState } from 'react';
 import '../../css/ApiDocs.css';
 import AppLayout from '../Layouts/AppLayout';
 import translations from '../translations';
+import { appUrl } from '../url';
 
 export default function ApiDocs() {
     const [language, setLanguage] = useState(
@@ -35,7 +35,7 @@ export default function ApiDocs() {
         // Swagger UI nacita OpenAPI JSON vygenerovany Scramble z Laravel rout.
         SwaggerUI({
             dom_id: '#swagger-ui',
-            url: '/openapi.json',
+            url: appUrl('/openapi.json'),
             deepLinking: true,
             docExpansion: 'list',
             defaultModelsExpandDepth: 1,
@@ -53,7 +53,7 @@ export default function ApiDocs() {
                     <p>{t.intro}</p>
                     <a
                         className="api-docs-pdf-link"
-                        href="/api-docs/pdf"
+                        href={appUrl('/api-docs/pdf')}
                         target="_blank"
                         rel="noreferrer"
                     >

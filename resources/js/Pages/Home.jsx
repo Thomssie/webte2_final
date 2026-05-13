@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import '../../css/Home.css';
 import AppLayout from '../Layouts/AppLayout';
 import translations from '../translations';
+import { appUrl } from '../url';
 
 export default function Home() {
     const [language, setLanguage] = useState(
@@ -33,15 +34,15 @@ export default function Home() {
                     <p>{t.intro}</p>
 
                     <div className="home-actions">
-                        <Link href="/cas" className="home-action home-action-primary">
+                        <Link href={appUrl('/cas')} className="home-action home-action-primary">
                             {t.openCasConsole}
                         </Link>
 
-                        <Link href="/animations/ball-beam" className="home-action">
+                        <Link href={appUrl('/animations/ball-beam')} className="home-action">
                             {t.ballBeamTitle}
                         </Link>
 
-                        <Link href="/animations/inverted-pendulum" className="home-action">
+                        <Link href={appUrl('/animations/inverted-pendulum')} className="home-action">
                             {t.invertedPendulumTitle}
                         </Link>
                     </div>

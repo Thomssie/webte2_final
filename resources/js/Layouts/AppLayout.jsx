@@ -2,9 +2,14 @@ import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import '../../css/AppLayout.css';
 import translations from '../translations';
+import { appUrl, getBasePath } from '../url';
 
 export default function AppLayout({ children }) {
     const { url } = usePage();
+    const basePath = getBasePath();
+    const currentUrl = basePath && url.startsWith(basePath)
+        ? url.slice(basePath.length) || '/'
+        : url;
 
     const [language, setLanguage] = useState(
         localStorage.getItem('app_language') || 'en'
@@ -25,15 +30,15 @@ export default function AppLayout({ children }) {
     }
 
     function isActive(path) {
-        return url === path || url.startsWith(`${path}/`);
+        return currentUrl === path || currentUrl.startsWith(`${path}/`);
     }
 
     return (
         <div className="page-shell">
             <header className="navbar">
-                <Link href="/" className="navbar-brand">
+                <Link href={appUrl('/')} className="navbar-brand">
                     <img
-                        src="/images/labLogo2.png"
+                        src={appUrl('/images/labLogo2.png')}
                         alt="TomTib Lab logo"
                         className="navbar-logo"
                     />
@@ -42,11 +47,11 @@ export default function AppLayout({ children }) {
 
 
                 <nav className="navbar-links">
-                    <Link href="/" className={url === '/' ? 'is-active' : ''}>
+                    <Link href={appUrl('/')} className={currentUrl === '/' ? 'is-active' : ''}>
                         {t.home}
                     </Link>
 
-                    <Link href="/cas" className={isActive('/cas') ? 'is-active' : ''}>
+                    <Link href={appUrl('/cas')} className={isActive('/cas') ? 'is-active' : ''}>
                         {t.casConsole}
                     </Link>
 
@@ -59,25 +64,25 @@ export default function AppLayout({ children }) {
                         </button>
 
                         <div className="navbar-dropdown-menu">
-                            <Link href="/animations/ball-beam">
+                            <Link href={appUrl('/animations/ball-beam')}>
                                 {t.ballBeam}
                             </Link>
 
-                            <Link href="/animations/inverted-pendulum">
+                            <Link href={appUrl('/animations/inverted-pendulum')}>
                                 {t.invertedPendulum}
                             </Link>
                         </div>
                     </div>
 
-                    <Link href="/logs" className={isActive('/logs') ? 'is-active' : ''}>
+                    <Link href={appUrl('/logs')} className={isActive('/logs') ? 'is-active' : ''}>
                         {t.logs}
                     </Link>
 
-                    <Link href="/api-docs" className={isActive('/api-docs') ? 'is-active' : ''}>
+                    <Link href={appUrl('/api-docs')} className={isActive('/api-docs') ? 'is-active' : ''}>
                         {t.apiDocs}
                     </Link>
 
-                    <Link href="/statistics" className={isActive('/statistics') ? 'is-active' : ''}>
+                    <Link href={appUrl('/statistics')} className={isActive('/statistics') ? 'is-active' : ''}>
                         {t.statistics}
                     </Link>
                 </nav>
