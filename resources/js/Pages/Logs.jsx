@@ -34,11 +34,8 @@ export default function Logs() {
         setError('');
 
         try {
-            const response = await fetch('/api/cas/logs/export', {
+            const response = await fetch('/web/cas/logs/export', {
                 method: 'GET',
-                headers: {
-                    'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
-                },
             });
 
             if (!response.ok) {

@@ -6,6 +6,7 @@ import AppLayout from '../Layouts/AppLayout';
 import translations from '../translations.js';
 import { StreamLanguage } from '@codemirror/language';
 import { octave } from '@codemirror/legacy-modes/mode/octave';
+import { getCsrfToken } from '../csrf.js';
 
 
 
@@ -46,12 +47,12 @@ export default function CasConsole() {
         const sessionToken = localStorage.getItem('cas_session_token') || 'default-session';
 
         try {
-            const response = await fetch('/api/cas/execute', {
+            const response = await fetch('/web/cas/execute', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                    'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
+                    'X-CSRF-TOKEN': getCsrfToken(),
                     'X-Session-Token': sessionToken,
                 },
                 body: JSON.stringify({
@@ -83,11 +84,11 @@ export default function CasConsole() {
         const sessionToken = localStorage.getItem('cas_session_token') || 'default-session';
 
         try {
-            const response = await fetch('/api/cas/history/reset', {
+            const response = await fetch('/web/cas/history/reset', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
-                    'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
+                    'X-CSRF-TOKEN': getCsrfToken(),
                     'X-Session-Token': sessionToken,
                 },
             });
@@ -113,11 +114,10 @@ export default function CasConsole() {
     }
 
     async function loadHistory() {
-        const response = await fetch('/api/cas/history', {
+        const response = await fetch('/web/cas/history', {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
-                'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
                 'X-Session-Token': getSessionToken(),
             },
         });

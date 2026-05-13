@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import '../../css/BallBeam.css';
 import AppLayout from '../Layouts/AppLayout';
 import animationConfig from '../config/animation';
+import { getCsrfToken } from '../csrf';
 import translations from '../translations';
 import {
     CartesianGrid,
@@ -139,12 +140,12 @@ export default function BallBeam() {
         setIsPlaying(false);
 
         try {
-            const response = await fetch('/api/simulations/ball-beam', {
+            const response = await fetch('/web/simulations/ball-beam', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                    'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
+                    'X-CSRF-TOKEN': getCsrfToken(),
                 },
                 body: JSON.stringify({
                     initial_position: Number(params.initialPosition),

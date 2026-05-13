@@ -69,11 +69,10 @@ export default function Statistics() {
         setError('');
 
         try {
-            const response = await fetch('/api/statistics/animations', {
+            const response = await fetch('/web/statistics/animations', {
                 method: 'GET',
                 headers: {
                     Accept: 'application/json',
-                    'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
                 },
             });
 
@@ -108,11 +107,10 @@ export default function Statistics() {
         setError('');
 
         try {
-            const response = await fetch(`/api/statistics/animations/${animationType}`, {
+            const response = await fetch(`/web/statistics/animations/${animationType}`, {
                 method: 'GET',
                 headers: {
                     Accept: 'application/json',
-                    'X-API-Key': import.meta.env.VITE_CAS_API_KEY,
                 },
             });
 
