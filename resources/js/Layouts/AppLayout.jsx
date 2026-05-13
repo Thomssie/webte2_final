@@ -1,9 +1,11 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import '../../css/AppLayout.css';
 import translations from '../translations';
 
 export default function AppLayout({ children }) {
+    const { url } = usePage();
+
     const [language, setLanguage] = useState(
         localStorage.getItem('app_language') || 'en'
     );
@@ -22,21 +24,62 @@ export default function AppLayout({ children }) {
         }));
     }
 
+    function isActive(path) {
+        return url === path || url.startsWith(`${path}/`);
+    }
+
     return (
         <div className="page-shell">
             <header className="navbar">
                 <Link href="/" className="navbar-brand">
-                    {t.appName}
+                    <img
+                        src="/images/labLogo2.png"
+                        alt="TomTib Lab logo"
+                        className="navbar-logo"
+                    />
+                    <span>{t.appName}</span>
                 </Link>
 
+
                 <nav className="navbar-links">
-                    <Link href="/">{t.home}</Link>
-                    <Link href="/cas">{t.casConsole}</Link>
-                    <Link href="/animations/ball-beam">{t.ballBeam}</Link>
-                    <Link href="/animations/inverted-pendulum">{t.invertedPendulum}</Link>
-                    <Link href="/logs">{t.logs}</Link>
-                    <Link href="/api-docs">{t.apiDocs}</Link>
-                    <Link href="/statistics">{t.statistics}</Link>
+                    <Link href="/" className={url === '/' ? 'is-active' : ''}>
+                        {t.home}
+                    </Link>
+
+                    <Link href="/cas" className={isActive('/cas') ? 'is-active' : ''}>
+                        {t.casConsole}
+                    </Link>
+
+                    <div className={`navbar-dropdown ${isActive('/animations') ? 'is-active' : ''}`}>
+                        <button type="button" className="navbar-dropdown-trigger">
+                            {t.simulations}
+                            <span className="material-symbols-rounded navbar-dropdown-chevron">
+                                keyboard_arrow_down
+                            </span>
+                        </button>
+
+                        <div className="navbar-dropdown-menu">
+                            <Link href="/animations/ball-beam">
+                                {t.ballBeam}
+                            </Link>
+
+                            <Link href="/animations/inverted-pendulum">
+                                {t.invertedPendulum}
+                            </Link>
+                        </div>
+                    </div>
+
+                    <Link href="/logs" className={isActive('/logs') ? 'is-active' : ''}>
+                        {t.logs}
+                    </Link>
+
+                    <Link href="/api-docs" className={isActive('/api-docs') ? 'is-active' : ''}>
+                        {t.apiDocs}
+                    </Link>
+
+                    <Link href="/statistics" className={isActive('/statistics') ? 'is-active' : ''}>
+                        {t.statistics}
+                    </Link>
                 </nav>
 
                 <div className="language-switch">

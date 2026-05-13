@@ -27,32 +27,24 @@ export default function Home() {
         <AppLayout>
             <Head title={t.pageTitle} />
 
-            <section className="home">
-                <div className="home-intro">
+            <section className="home-hero">
+                <div className="home-hero-content">
                     <h1>{t.pageTitle}</h1>
                     <p>{t.intro}</p>
-                </div>
 
-                <div className="home-grid">
-                    <Link href="/cas" className="home-card">
-                        <h2>{t.casTitle}</h2>
-                        <p>{t.casDescription}</p>
-                    </Link>
+                    <div className="home-actions">
+                        <Link href="/cas" className="home-action home-action-primary">
+                            {t.openCasConsole}
+                        </Link>
 
-                    <Link href="/animations/ball-beam" className="home-card">
-                        <h2>{t.ballBeamTitle}</h2>
-                        <p>{t.ballBeamDescription}</p>
-                    </Link>
+                        <Link href="/animations/ball-beam" className="home-action">
+                            {t.ballBeamTitle}
+                        </Link>
 
-                    <Link href="/animations/inverted-pendulum" className="home-card">
-                        <h2>{t.invertedPendulumTitle}</h2>
-                        <p>{t.invertedPendulumDescription}</p>
-                    </Link>
-
-                    <Link href="/api-docs" className="home-card">
-                        <h2>{t.docsTitle}</h2>
-                        <p>{t.docsDescription}</p>
-                    </Link>
+                        <Link href="/animations/inverted-pendulum" className="home-action">
+                            {t.invertedPendulumTitle}
+                        </Link>
+                    </div>
                 </div>
             </section>
         </AppLayout>

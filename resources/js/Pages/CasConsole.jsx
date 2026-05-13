@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import '../../css/CasConsole.css';
 import AppLayout from '../Layouts/AppLayout';
 import translations from '../translations.js';
+import { StreamLanguage } from '@codemirror/language';
+import { octave } from '@codemirror/legacy-modes/mode/octave';
 
 
 
@@ -137,7 +139,8 @@ export default function CasConsole() {
                 <div className="cas-editor">
                     <CodeMirror
                         value={command}
-                        height="180px"
+                        height="100%"
+                        extensions={[StreamLanguage.define(octave)]}
                         basicSetup={{
                             lineNumbers: true,
                             foldGutter: false,

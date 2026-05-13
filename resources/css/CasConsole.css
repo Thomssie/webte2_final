@@ -22,10 +22,22 @@
 }
 
 .cas-editor {
+    height: 220px;
+    min-height: 140px;
+    max-height: 520px;
     margin-top: 16px;
     border: 1px solid rgba(87, 196, 206, 0.55);
     border-radius: 18px;
-    overflow: hidden;
+    overflow: auto;
+    resize: vertical;
+}
+
+.cas-editor .cm-editor {
+    height: 100%;
+}
+
+.cas-editor .cm-scroller {
+    overflow: auto;
 }
 
 .cas-actions {
