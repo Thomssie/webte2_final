@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\OpenApiTranslationService;
 use Dedoc\Scramble\Generator;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 
@@ -12,14 +14,21 @@ class ApiDocumentationPdfController extends Controller
 {
     // Vygeneruje aktualne PDF API dokumentacie zo spolocnej OpenAPI specifikacie.
     // Pouziva sa v route /api-docs/pdf pri otvoreni alebo stiahnuti PDF dokumentacie.
-    public function __invoke(OpenApiController $openApi, Generator $generator): Response
-    {
-        $specification = $openApi->specification($generator);
-        $documentTitle = 'TomTib Lab API dokumentacia';
+    public function __invoke(
+        Request $request,
+        OpenApiController $openApi,
+        Generator $generator,
+        OpenApiTranslationService $translator
+    ): Response {
+        $language = $request->query('lang') === 'en' ? 'en' : 'sk';
+        $specification = $translator->translate($openApi->specification($generator), $language);
+        $documentTitle = $language === 'en'
+            ? 'TomTib Lab API documentation'
+            : 'TomTib Lab API dokumentacia';
 
         $html = view('pdf.api-docs', [
             'documentTitle' => $documentTitle,
-            'language' => 'sk',
+            'language' => $language,
             'specification' => $specification,
             'operations' => $this->operations($specification),
             'securitySchemes' => $specification['components']['securitySchemes'] ?? [],
@@ -38,7 +47,9 @@ class ApiDocumentationPdfController extends Controller
         // Cislo strany doplnime az po renderovani, lebo az vtedy pozname celkovy pocet stran.
         $font = $dompdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
         $canvas = $dompdf->getCanvas();
-        $pageLabel = 'Strana {PAGE_NUM}/{PAGE_COUNT}';
+        $pageLabel = $language === 'en'
+            ? 'Page {PAGE_NUM}/{PAGE_COUNT}'
+            : 'Strana {PAGE_NUM}/{PAGE_COUNT}';
         $canvas->page_text(260, 782, $pageLabel, $font, 9, [0, 0, 0]);
 
         $fileName = Str::slug($documentTitle) . '.pdf';

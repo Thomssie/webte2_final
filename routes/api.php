@@ -13,7 +13,6 @@ use App\Http\Controllers\Api\StatisticsController;
 
 
 Route::middleware(ValidateApiKey::class)->group(function () {
-    Route::get('/cas/ping', [CasController::class, 'ping']);
     Route::post('/cas/execute', [CasController::class, 'execute']);
     Route::get('/cas/history', [CasController::class, 'history']);
     Route::post('/cas/history/reset', [CasController::class, 'resetHistory']);
@@ -26,4 +25,3 @@ Route::middleware(ValidateApiKey::class)->group(function () {
 
 
 });
-

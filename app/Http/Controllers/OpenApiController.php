@@ -2,17 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\OpenApiTranslationService;
 use Dedoc\Scramble\Generator;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class OpenApiController extends Controller
 {
     // Vytvori JSON odpoved so specifikaciou, ktoru Scramble vygeneruje z Laravel API rout.
     // Pouziva sa ako zdroj pre Swagger UI na stranke /api-docs.
-    public function __invoke(Generator $generator): JsonResponse
+    public function __invoke(
+        Request $request,
+        Generator $generator,
+        OpenApiTranslationService $translator
+    ): JsonResponse
     {
-        return response()->json($this->specification($generator));
+        $language = $request->query('lang') === 'en' ? 'en' : 'sk';
+
+        return response()->json(
+            $translator->translate($this->specification($generator), $language)
+        );
     }
 
     // Vrati aktualnu OpenAPI specifikaciu ako pole bez rucne udrziavaneho zoznamu endpointov.

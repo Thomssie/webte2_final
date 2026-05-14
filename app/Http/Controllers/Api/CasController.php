@@ -20,26 +20,6 @@ use Illuminate\Support\Str;
 #[Group('CAS', 'CAS prikazy v Octave, historia a logy')]
 class CasController extends Controller
 {
-    // Endpoint overi dostupnost CAS API a zapise kontrolny log.
-    #[Endpoint(title: 'Overenie dostupnosti CAS API', description: 'Vrati informaciu, ci je CAS API pripravene na spracovanie poziadaviek.')]
-    public function ping(Request $request): JsonResponse
-    {
-        CasLog::create([
-            'source' => 'api_ping',
-            'command' => 'ping',
-            'success' => true,
-            'output' => 'CAS API is ready',
-            'error_message' => null,
-            'ip_address' => CasLog::hashIp($request->ip()),
-        ]);
-
-        return response()->json([
-            'ok' => true,
-            'message' => 'CAS API is ready',
-        ]);
-    }
-
-
     // Endpoint spusti prikaz v Octave a pouzije historiu prikazov aktualnej relacie.
     #[Endpoint(title: 'Spustenie prikazu v Octave', description: 'Spusti prikaz spolu s historiou aktualnej relacie, aby bolo mozne pouzivat pomocne premenne.')]
     #[HeaderParameter('Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]

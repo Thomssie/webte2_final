@@ -167,7 +167,7 @@ export default function Statistics() {
             <section className="statistics-page">
                 <div className="statistics-header">
                     <h1>{t.pageTitle}</h1>
-                    <p>{t.intro}</p>
+                    {/*<p>{t.intro}</p>*/}
                 </div>
 
                 <div className="statistics-toolbar">

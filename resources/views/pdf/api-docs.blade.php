@@ -204,6 +204,56 @@
             'endpoints' => 'Endpointy',
         ];
 
+    $documentDescription = $language === 'en'
+        ? 'REST API for CAS calculations, dynamic system simulations, logs, and statistics.'
+        : $specification['info']['description'];
+
+    $englishOperations = [
+        'POST /cas/execute' => [
+            'summary' => 'Execute an Octave command',
+            'description' => 'Runs an Octave command with the current session history so helper variables can be reused.',
+        ],
+        'GET /cas/history' => [
+            'summary' => 'Session command history',
+            'description' => 'Returns commands stored under the selected session token.',
+        ],
+        'POST /cas/history/reset' => [
+            'summary' => 'Reset session history',
+            'description' => 'Deletes stored commands for the selected session token.',
+        ],
+        'GET /cas/logs' => [
+            'summary' => 'CAS request logs',
+            'description' => 'Returns logs of CAS and simulation requests.',
+        ],
+        'GET /cas/logs/export' => [
+            'summary' => 'Export logs to CSV',
+            'description' => 'Returns a CSV file with all stored CAS logs.',
+        ],
+        'POST /simulations/ball-beam' => [
+            'summary' => 'Ball and beam simulation',
+            'description' => 'Returns time, ball position, and beam angle data for the animation.',
+        ],
+        'POST /simulations/inverted-pendulum' => [
+            'summary' => 'Inverted pendulum simulation',
+            'description' => 'Returns time, cart position, and pendulum angle data for the animation.',
+        ],
+        'GET /statistics/animations' => [
+            'summary' => 'Animation usage summary',
+            'description' => 'Returns aggregated usage counts for each animation type.',
+        ],
+        'GET /statistics/animations/{animationType}' => [
+            'summary' => 'Animation usage details',
+            'description' => 'Returns detailed usage records for the selected animation type.',
+        ],
+    ];
+
+    $englishParameterDescriptions = [
+        'header:Session-Token' => 'CAS session identifier.',
+        'query:all' => 'When true, returns all logs without a limit.',
+        'query:limit' => 'Maximum number of logs in the standard listing.',
+        'path:animationType' => 'Animation type.',
+    ];
+
     // Prevedie OpenAPI schemu na kratky textovy nazov vhodny do PDF.
     // Pouziva sa pri vypise request body schem pri jednotlivych endpointoch.
     $schemaLabel = function (?array $schema): string {
@@ -230,7 +280,7 @@
 <div class="pdf-footer-line"></div>
 
 <h1>{{ $documentTitle }}</h1>
-<p>{{ $specification['info']['description'] }}</p>
+<p>{{ $documentDescription }}</p>
 <p class="muted">
     {{ $labels['version'] }}: {{ $specification['info']['version'] }}
     &nbsp;|&nbsp;
@@ -251,7 +301,11 @@
         <tr>
             <td><code>{{ $name }}</code></td>
             <td>{{ $scheme['type'] ?? '-' }}</td>
-            <td>{{ $scheme['description'] ?? '-' }}</td>
+            <td>
+                {{ $language === 'en' && $name === 'ApiKeyAuth'
+                    ? 'API key defined in the application configuration.'
+                    : ($scheme['description'] ?? '-') }}
+            </td>
         </tr>
     @endforeach
     </tbody>
@@ -259,16 +313,25 @@
 
 <h2>{{ $labels['endpoints'] }}</h2>
 @foreach ($operations as $operation)
+    @php
+        $operationKey = $operation['method'] . ' ' . $operation['path'];
+        $translatedOperation = $language === 'en'
+            ? ($englishOperations[$operationKey] ?? null)
+            : null;
+        $operationSummary = $translatedOperation['summary'] ?? $operation['summary'];
+        $operationDescription = $translatedOperation['description'] ?? $operation['description'];
+    @endphp
+
     <div class="operation">
         <div class="operation-title">
             <span class="method method-{{ strtolower($operation['method']) }}">{{ $operation['method'] }}</span>
             <span class="path">{{ $operation['path'] }}</span>
         </div>
 
-        <h3>{{ $operation['summary'] }}</h3>
+        <h3>{{ $operationSummary }}</h3>
 
-        @if ($operation['description'])
-            <p>{{ $operation['description'] }}</p>
+        @if ($operationDescription)
+            <p>{{ $operationDescription }}</p>
         @endif
 
         @if (count($operation['security']))
@@ -288,11 +351,18 @@
                 </thead>
                 <tbody>
                 @foreach ($operation['parameters'] as $parameter)
+                    @php
+                        $parameterKey = ($parameter['in'] ?? '') . ':' . ($parameter['name'] ?? '');
+                        $parameterDescription = $language === 'en'
+                            ? ($englishParameterDescriptions[$parameterKey] ?? ($parameter['description'] ?? '-'))
+                            : ($parameter['description'] ?? '-');
+                    @endphp
+
                     <tr>
                         <td><code>{{ $parameter['name'] ?? '-' }}</code></td>
                         <td>{{ $parameter['in'] ?? '-' }}</td>
                         <td>{{ ($parameter['required'] ?? false) ? $labels['yes'] : $labels['no'] }}</td>
-                        <td>{{ $parameter['description'] ?? '-' }}</td>
+                        <td>{{ $parameterDescription }}</td>
                     </tr>
                 @endforeach
                 </tbody>

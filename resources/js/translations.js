@@ -219,7 +219,7 @@ const translations = {
             uses: 'Použitia',
             details: 'Detaily',
             hideDetails: 'Skryť detaily',
-            refresh: 'Obnoviť',
+            refresh: 'Refresh',
             loading: 'Načítavam...',
             noRecords: 'Zatiaľ žiadne záznamy.',
             usedAt: 'Použité',
