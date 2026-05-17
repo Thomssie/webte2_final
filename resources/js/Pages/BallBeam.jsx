@@ -8,6 +8,8 @@ import translations from '../translations';
 import { appUrl } from '../url';
 import {
     CartesianGrid,
+    Label,
+    Legend,
     Line,
     LineChart,
     ReferenceLine,
@@ -28,6 +30,9 @@ export default function BallBeam() {
 
     const [params, setParams] = useState({
         initialPosition: '-0.2',
+        initialVelocity: '0',
+        initialAngle: '0',
+        initialAngularVelocity: '0',
         targetPosition: '0',
         duration: '5',
     });
@@ -92,9 +97,7 @@ export default function BallBeam() {
     // Uklada zmenu formularoveho parametra a resetuje stare vysledky simulacie.
     // Pouziva sa v onChange handleroch formularovych inputov.
     function updateParam(name, value) {
-        const normalizedValue = ['initialPosition', 'targetPosition'].includes(name)
-            ? normalizePositionValue(value)
-            : value;
+        const normalizedValue = normalizeParamValue(name, value);
 
         setParams((current) => ({
             ...current,
@@ -107,28 +110,50 @@ export default function BallBeam() {
         }
     }
 
-    // Oreze poziciu gulicky na povoleny rozsah tyce.
+    // Oreze ciselny vstup na povoleny rozsah pre dany parameter simulacie.
     // Pouziva sa vo funkcii updateParam().
-    function normalizePositionValue(value) {
+    function normalizeParamValue(name, value) {
         if (['', '-', '.', '-.'].includes(value)) {
             return value;
         }
 
-        const numericValue = Number(value);
+        const limits = {
+            initialPosition: { min: -0.5, max: 0.5 },
+            initialVelocity: { min: -5, max: 5 },
+            initialAngle: { min: -45, max: 45 },
+            initialAngularVelocity: { min: -10, max: 10 },
+            targetPosition: { min: -0.5, max: 0.5 },
+            duration: { min: 1, max: 30 },
+        };
 
-        if (!Number.isFinite(numericValue)) {
+        const numericValue = Number(value);
+        const limit = limits[name];
+
+        if (!limit || !Number.isFinite(numericValue)) {
             return value;
         }
 
-        if (numericValue < -0.5) {
-            return '-0.5';
+        if (numericValue < limit.min) {
+            return String(limit.min);
         }
 
-        if (numericValue > 0.5) {
-            return '0.5';
+        if (numericValue > limit.max) {
+            return String(limit.max);
         }
 
         return value;
+    }
+
+    // Vrati cislo z formulara alebo nahradnu hodnotu, ak pouzivatel nechal pole prazdne.
+    // Pouziva sa pred odoslanim simulacie.
+    function numberOrFallback(value, fallback = 0) {
+        if (['', '-', '.', '-.'].includes(value)) {
+            return fallback;
+        }
+
+        const numericValue = Number(value);
+
+        return Number.isFinite(numericValue) ? numericValue : fallback;
     }
 
     // Odosle parametre simulacie na backend a ulozi vypocitane data pre animaciu a graf.
@@ -141,6 +166,24 @@ export default function BallBeam() {
         setIsPlaying(false);
 
         try {
+            const submissionParams = {
+                initialPosition: numberOrFallback(params.initialPosition),
+                initialVelocity: numberOrFallback(params.initialVelocity),
+                initialAngle: numberOrFallback(params.initialAngle),
+                initialAngularVelocity: numberOrFallback(params.initialAngularVelocity),
+                targetPosition: numberOrFallback(params.targetPosition),
+                duration: numberOrFallback(params.duration, 1),
+            };
+
+            setParams({
+                initialPosition: String(submissionParams.initialPosition),
+                initialVelocity: String(submissionParams.initialVelocity),
+                initialAngle: String(submissionParams.initialAngle),
+                initialAngularVelocity: String(submissionParams.initialAngularVelocity),
+                targetPosition: String(submissionParams.targetPosition),
+                duration: String(submissionParams.duration),
+            });
+
             const response = await fetch(appUrl('/web/simulations/ball-beam'), {
                 method: 'POST',
                 headers: {
@@ -149,11 +192,12 @@ export default function BallBeam() {
                     'X-CSRF-TOKEN': getCsrfToken(),
                 },
                 body: JSON.stringify({
-                    initial_position: Number(params.initialPosition),
-                    initial_velocity: 0,
-                    initial_angle: 0,
-                    target_position: Number(params.targetPosition),
-                    duration: Number(params.duration),
+                    initial_position: submissionParams.initialPosition,
+                    initial_velocity: submissionParams.initialVelocity,
+                    initial_angle: submissionParams.initialAngle,
+                    initial_angular_velocity: submissionParams.initialAngularVelocity,
+                    target_position: submissionParams.targetPosition,
+                    duration: submissionParams.duration,
                 }),
             });
 
@@ -199,7 +243,9 @@ export default function BallBeam() {
     const previewPosition = Number.isFinite(Number(params.initialPosition))
         ? Number(params.initialPosition)
         : 0;
-    const previewAngle = 0;
+    const previewAngle = Number.isFinite(Number(params.initialAngle))
+        ? Number(params.initialAngle) * (Math.PI / 180)
+        : 0;
     const currentTime = simulationData ? playbackTime : 0;
 
     // Najdeme dva susedne vypocitane body, medzi ktorymi sa aktualne prehravanie nachadza.
@@ -291,6 +337,48 @@ export default function BallBeam() {
                         </label>
 
                         <label>
+                            <span>{t.initialVelocity}</span>
+                            <input
+                                type="number"
+                                min="-5"
+                                max="5"
+                                step="0.01"
+                                value={params.initialVelocity}
+                                disabled={loading || isPlaying}
+                                onChange={(event) => updateParam('initialVelocity', event.target.value)}
+                            />
+                            <small>{t.velocityRangeHint}</small>
+                        </label>
+
+                        <label>
+                            <span>{t.initialAngle}</span>
+                            <input
+                                type="number"
+                                min="-45"
+                                max="45"
+                                step="1"
+                                value={params.initialAngle}
+                                disabled={loading || isPlaying}
+                                onChange={(event) => updateParam('initialAngle', event.target.value)}
+                            />
+                            <small>{t.angleRangeHint}</small>
+                        </label>
+
+                        <label>
+                            <span>{t.initialAngularVelocity}</span>
+                            <input
+                                type="number"
+                                min="-10"
+                                max="10"
+                                step="0.1"
+                                value={params.initialAngularVelocity}
+                                disabled={loading || isPlaying}
+                                onChange={(event) => updateParam('initialAngularVelocity', event.target.value)}
+                            />
+                            <small>{t.angularVelocityRangeHint}</small>
+                        </label>
+
+                        <label>
                             <span>{t.targetPosition}</span>
                             <input
                                 type="number"
@@ -308,10 +396,14 @@ export default function BallBeam() {
                             <span>{t.duration}</span>
                             <input
                                 type="number"
+                                min="1"
+                                max="30"
+                                step="1"
                                 value={params.duration}
                                 disabled={loading || isPlaying}
                                 onChange={(event) => updateParam('duration', event.target.value)}
                             />
+                            <small>{t.durationRangeHint}</small>
                         </label>
 
                         <button type="button" onClick={runSimulation} disabled={loading || isPlaying}>
@@ -323,14 +415,18 @@ export default function BallBeam() {
                         <section className="simulation-panel simulation-animation-panel">
                             <h2>{t.animation}</h2>
                             <div className="ball-beam-preview">
-                                <div
-                                    className="beam-line"
-                                    style={{ transform: `rotate(${currentAngleDegrees}deg)` }}
-                                >
+                                <div className="beam-system">
                                     <div
-                                        className="beam-ball"
-                                        style={{ left: `${visualBallPosition}%` }}
-                                    />
+                                        className="beam-line"
+                                        style={{ transform: `rotate(${currentAngleDegrees}deg)` }}
+                                    >
+                                        <div
+                                            className="beam-ball"
+                                            style={{ left: `${visualBallPosition}%` }}
+                                        />
+                                    </div>
+
+                                    <div className="beam-pivot" />
                                 </div>
                             </div>
 
@@ -365,41 +461,64 @@ export default function BallBeam() {
                             )}
                         </section>
 
-                    </div>
-
-                    <section className="simulation-panel simulation-graph-panel">
-                        <h2>{t.graph}</h2>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={chartData} margin={{ top: 8, right: 24, bottom: 8, left: 28 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                    dataKey="time"
-                                    type="number"
-                                    domain={[0, chartEndTime]}
-                                />
-                                <YAxis
-                                    width={72}
-                                    domain={[minPosition - positionPadding, maxPosition + positionPadding]}
-                                    tickFormatter={(value) => Number(value).toFixed(3)}
-                                />
+                        <section className="simulation-panel simulation-graph-panel">
+                            <h2>{t.graph}</h2>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={chartData} margin={{ top: 8, right: 42, bottom: 24, left: 42 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="time"
+                                        type="number"
+                                        domain={[0, chartEndTime]}
+                                    >
+                                        <Label value={t.timeAxis} offset={-2} position="insideBottom" />
+                                    </XAxis>
+                                    <YAxis
+                                        yAxisId="position"
+                                        width={72}
+                                        domain={[minPosition - positionPadding, maxPosition + positionPadding]}
+                                        tickFormatter={(value) => Number(value).toFixed(3)}
+                                    >
+                                        <Label value={t.positionAxis} angle={-90} position="insideLeft" />
+                                    </YAxis>
+                                    <YAxis
+                                        yAxisId="angle"
+                                        orientation="right"
+                                        tickFormatter={(value) => Number(value).toFixed(2)}
+                                    >
+                                        <Label value={t.angleAxis} angle={90} position="insideRight" />
+                                    </YAxis>
                                 <Tooltip />
                                 <Line
-                                    type="monotone"
-                                    dataKey="position"
-                                    stroke="#57C4CE"
-                                    dot={false}
-                                    isAnimationActive={false}
-                                />
-                                {simulationData && (
-                                    <ReferenceLine
-                                        x={currentTime}
+                                        yAxisId="position"
+                                        type="monotone"
+                                        dataKey="position"
+                                        name={t.positionSeries}
                                         stroke="#57C4CE"
-                                        strokeWidth={2}
+                                        dot={false}
+                                        isAnimationActive={false}
+                                />
+                                <Line
+                                        yAxisId="angle"
+                                        type="monotone"
+                                        dataKey="angle"
+                                        name={t.angleSeries}
+                                        stroke="#F97316"
+                                        dot={false}
+                                        isAnimationActive={false}
                                     />
-                                )}
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </section>
+                                    <Legend verticalAlign="top" align="right" height={24} iconType="line" />
+                                    {simulationData && (
+                                        <ReferenceLine
+                                        x={currentTime}
+                                            stroke="#57C4CE"
+                                            strokeWidth={2}
+                                        />
+                                    )}
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </section>
+                    </div>
                 </div>
             </section>
         </AppLayout>

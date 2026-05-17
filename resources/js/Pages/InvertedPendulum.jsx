@@ -8,6 +8,8 @@ import translations from '../translations';
 import { appUrl } from '../url';
 import {
     CartesianGrid,
+    Label,
+    Legend,
     Line,
     LineChart,
     ReferenceLine,
@@ -28,7 +30,9 @@ export default function InvertedPendulum() {
 
     const [params, setParams] = useState({
         initialPosition: '0',
+        initialVelocity: '0',
         initialAngle: '5',
+        initialAngularVelocity: '0',
         targetPosition: '0.2',
         duration: '5',
     });
@@ -116,9 +120,11 @@ export default function InvertedPendulum() {
         }
 
         const limits = {
-            initialPosition: { min: -2, max: 2 },
+            initialPosition: { min: -100, max: 100 },
+            initialVelocity: { min: -10, max: 10 },
             initialAngle: { min: -45, max: 45 },
-            targetPosition: { min: -2, max: 2 },
+            initialAngularVelocity: { min: -10, max: 10 },
+            targetPosition: { min: -100, max: 100 },
             duration: { min: 1, max: 30 },
         };
 
@@ -141,6 +147,18 @@ export default function InvertedPendulum() {
         return value;
     }
 
+    // Vrati cislo z formulara alebo nahradnu hodnotu, ak pouzivatel nechal pole prazdne.
+    // Pouziva sa pred odoslanim simulacie.
+    function numberOrFallback(value, fallback = 0) {
+        if (['', '-', '.', '-.'].includes(value)) {
+            return fallback;
+        }
+
+        const numericValue = Number(value);
+
+        return Number.isFinite(numericValue) ? numericValue : fallback;
+    }
+
     // Odosle parametre simulacie na backend a ulozi vypocitane data pre animaciu a graf.
     // Pouziva sa po kliknuti na tlacidlo spustenia simulacie.
     async function runSimulation() {
@@ -151,6 +169,24 @@ export default function InvertedPendulum() {
         setIsPlaying(false);
 
         try {
+            const submissionParams = {
+                initialPosition: numberOrFallback(params.initialPosition),
+                initialVelocity: numberOrFallback(params.initialVelocity),
+                initialAngle: numberOrFallback(params.initialAngle),
+                initialAngularVelocity: numberOrFallback(params.initialAngularVelocity),
+                targetPosition: numberOrFallback(params.targetPosition),
+                duration: numberOrFallback(params.duration, 1),
+            };
+
+            setParams({
+                initialPosition: String(submissionParams.initialPosition),
+                initialVelocity: String(submissionParams.initialVelocity),
+                initialAngle: String(submissionParams.initialAngle),
+                initialAngularVelocity: String(submissionParams.initialAngularVelocity),
+                targetPosition: String(submissionParams.targetPosition),
+                duration: String(submissionParams.duration),
+            });
+
             const response = await fetch(appUrl('/web/simulations/inverted-pendulum'), {
                 method: 'POST',
                 headers: {
@@ -159,10 +195,12 @@ export default function InvertedPendulum() {
                     'X-CSRF-TOKEN': getCsrfToken(),
                 },
                 body: JSON.stringify({
-                    initial_position: Number(params.initialPosition),
-                    initial_angle: Number(params.initialAngle),
-                    target_position: Number(params.targetPosition),
-                    duration: Number(params.duration),
+                    initial_position: submissionParams.initialPosition,
+                    initial_velocity: submissionParams.initialVelocity,
+                    initial_angle: submissionParams.initialAngle,
+                    initial_angular_velocity: submissionParams.initialAngularVelocity,
+                    target_position: submissionParams.targetPosition,
+                    duration: submissionParams.duration,
                 }),
             });
 
@@ -250,18 +288,32 @@ export default function InvertedPendulum() {
         : previewAngle;
 
     const currentAngleDegrees = currentAngle * (180 / Math.PI);
-    const trackMinPosition = -2;
-    const trackMaxPosition = 2;
-    const trackStartPercent = 12;
-    const trackEndPercent = 88;
-
-    // Polohu vozika v metroch prevedieme na relativnu polohu v ramci vizualnej drahy.
-    const normalizedCartPosition = (currentPosition - trackMinPosition) / (trackMaxPosition - trackMinPosition);
-
-    // Fyzikalnu drahu vozika s dlzkou 4 m mapujeme na vnutornu cast animacnej plochy.
-    const visualCartPosition = trackStartPercent
-        + Math.max(0, Math.min(1, normalizedCartPosition)) * (trackEndPercent - trackStartPercent);
     const pendulumLength = 112;
+    const scalePixelsPerMeter = 120;
+    const scaleHalfRangeMeters = 3;
+    const scaleTickStep = 0.5;
+    const scaleStart = Math.floor((currentPosition - scaleHalfRangeMeters) / scaleTickStep) * scaleTickStep;
+    const scaleEnd = Math.ceil((currentPosition + scaleHalfRangeMeters) / scaleTickStep) * scaleTickStep;
+    const targetPosition = Number.isFinite(Number(params.targetPosition))
+        ? Number(params.targetPosition)
+        : 0;
+
+    // Mierku pocitame relativne ku aktualnej polohe, aby kamera sledovala vozik aj mimo zakladnej drahy.
+    const scaleTicks = [];
+
+    for (let tick = scaleStart; tick <= scaleEnd; tick += scaleTickStep) {
+        const roundedTick = Number(tick.toFixed(2));
+        const isMajorTick = Math.abs(roundedTick - Math.round(roundedTick)) < 0.001;
+
+        scaleTicks.push({
+            value: roundedTick,
+            label: isMajorTick ? `${Math.round(roundedTick)} m` : '',
+            offset: (roundedTick - currentPosition) * scalePixelsPerMeter,
+            isMajor: isMajorTick,
+        });
+    }
+
+    const targetOffset = (targetPosition - currentPosition) * scalePixelsPerMeter;
 
     // Graf zobrazuje iba data po aktualny cas prehravania a aktualny interpolovany bod.
     const chartData = simulationData
@@ -304,14 +356,28 @@ export default function InvertedPendulum() {
                             <span>{t.initialPosition}</span>
                             <input
                                 type="number"
-                                min="-2"
-                                max="2"
+                                min="-100"
+                                max="100"
                                 step="0.01"
                                 value={params.initialPosition}
                                 disabled={loading || isPlaying}
                                 onChange={(event) => updateParam('initialPosition', event.target.value)}
                             />
                             <small>{t.positionRangeHint}</small>
+                        </label>
+
+                        <label>
+                            <span>{t.initialVelocity}</span>
+                            <input
+                                type="number"
+                                min="-10"
+                                max="10"
+                                step="0.01"
+                                value={params.initialVelocity}
+                                disabled={loading || isPlaying}
+                                onChange={(event) => updateParam('initialVelocity', event.target.value)}
+                            />
+                            <small>{t.velocityRangeHint}</small>
                         </label>
 
                         <label>
@@ -329,11 +395,25 @@ export default function InvertedPendulum() {
                         </label>
 
                         <label>
+                            <span>{t.initialAngularVelocity}</span>
+                            <input
+                                type="number"
+                                min="-10"
+                                max="10"
+                                step="0.1"
+                                value={params.initialAngularVelocity}
+                                disabled={loading || isPlaying}
+                                onChange={(event) => updateParam('initialAngularVelocity', event.target.value)}
+                            />
+                            <small>{t.angularVelocityRangeHint}</small>
+                        </label>
+
+                        <label>
                             <span>{t.targetPosition}</span>
                             <input
                                 type="number"
-                                min="-2"
-                                max="2"
+                                min="-100"
+                                max="100"
                                 step="0.01"
                                 value={params.targetPosition}
                                 disabled={loading || isPlaying}
@@ -353,6 +433,7 @@ export default function InvertedPendulum() {
                                 disabled={loading || isPlaying}
                                 onChange={(event) => updateParam('duration', event.target.value)}
                             />
+                            <small>{t.durationRangeHint}</small>
                         </label>
 
                         <button type="button" onClick={runSimulation} disabled={loading || isPlaying}>
@@ -366,10 +447,29 @@ export default function InvertedPendulum() {
 
                             <div className="pendulum-preview">
                                 <div className="pendulum-track" />
+                                <div className="pendulum-scale" aria-hidden="true">
+                                    {scaleTicks.map((tick) => (
+                                        <div
+                                            key={tick.value}
+                                            className={`pendulum-scale-tick${tick.isMajor ? ' pendulum-scale-tick-major' : ''}`}
+                                            style={{ left: `calc(50% + ${tick.offset}px)` }}
+                                        >
+                                            {tick.label && (
+                                                <span>{tick.label}</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div
+                                    className="pendulum-target-marker"
+                                    style={{ left: `calc(50% + ${targetOffset}px)` }}
+                                    aria-hidden="true"
+                                />
 
                                 <div
                                     className="pendulum-cart"
-                                    style={{ left: `${visualCartPosition}%` }}
+                                    style={{ left: '50%' }}
                                 >
                                     <div
                                         className="pendulum-rod"
@@ -417,57 +517,66 @@ export default function InvertedPendulum() {
                                 <p className="pendulum-error">{error}</p>
                             )}
                         </section>
-                    </div>
 
-                    <section className="pendulum-panel pendulum-graph-panel">
-                        <h2>{t.graph}</h2>
+                        <section className="pendulum-panel pendulum-graph-panel">
+                            <h2>{t.graph}</h2>
 
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={chartData} margin={{ top: 8, right: 24, bottom: 8, left: 28 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                    dataKey="time"
-                                    type="number"
-                                    domain={[0, chartEndTime]}
-                                />
-                                <YAxis
-                                    yAxisId="position"
-                                    width={72}
-                                    domain={[minPosition - positionPadding, maxPosition + positionPadding]}
-                                    tickFormatter={(value) => Number(value).toFixed(2)}
-                                />
-                                <YAxis
-                                    yAxisId="angle"
-                                    orientation="right"
-                                    tickFormatter={(value) => Number(value).toFixed(2)}
-                                />
-                                <Tooltip />
-                                <Line
-                                    yAxisId="position"
-                                    type="monotone"
-                                    dataKey="position"
-                                    stroke="#57C4CE"
-                                    dot={false}
-                                    isAnimationActive={false}
-                                />
-                                <Line
-                                    yAxisId="angle"
-                                    type="monotone"
-                                    dataKey="angle"
-                                    stroke="#F97316"
-                                    dot={false}
-                                    isAnimationActive={false}
-                                />
-                                {simulationData && (
-                                    <ReferenceLine
-                                        x={currentTime}
-                                        stroke="#111827"
-                                        strokeWidth={2}
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={chartData} margin={{ top: 8, right: 42, bottom: 24, left: 42 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="time"
+                                        type="number"
+                                        domain={[0, chartEndTime]}
+                                    >
+                                        <Label value={t.timeAxis} offset={-2} position="insideBottom" />
+                                    </XAxis>
+                                    <YAxis
+                                        yAxisId="position"
+                                        width={72}
+                                        domain={[minPosition - positionPadding, maxPosition + positionPadding]}
+                                        tickFormatter={(value) => Number(value).toFixed(2)}
+                                    >
+                                        <Label value={t.positionAxis} angle={-90} position="insideLeft" />
+                                    </YAxis>
+                                    <YAxis
+                                        yAxisId="angle"
+                                        orientation="right"
+                                        tickFormatter={(value) => Number(value).toFixed(2)}
+                                    >
+                                        <Label value={t.angleAxis} angle={90} position="insideRight" />
+                                    </YAxis>
+                                    <Tooltip />
+                                    <Line
+                                        yAxisId="position"
+                                        type="monotone"
+                                        dataKey="position"
+                                        name={t.positionSeries}
+                                        stroke="#57C4CE"
+                                        dot={false}
+                                        isAnimationActive={false}
                                     />
-                                )}
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </section>
+                                    <Line
+                                        yAxisId="angle"
+                                        type="monotone"
+                                        dataKey="angle"
+                                        name={t.angleSeries}
+                                        stroke="#F97316"
+                                        dot={false}
+                                        isAnimationActive={false}
+                                    />
+                                    <Legend verticalAlign="top" align="right" height={24} iconType="line" />
+                                    {simulationData && (
+                                        <ReferenceLine
+                                            x={currentTime}
+                                            stroke="#111827"
+                                            strokeWidth={2}
+                                        />
+                                    )}
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </section>
+                    </div>
                 </div>
             </section>
         </AppLayout>

@@ -109,6 +109,10 @@ export default function AppLayout({ children }) {
             <main className="page-content">
                 {children}
             </main>
+
+            <footer className="app-footer">
+                ©2026 TomTibLab | All Rights Reserved
+            </footer>
         </div>
     );
 }

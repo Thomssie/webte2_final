@@ -10,11 +10,11 @@ use Dedoc\Scramble\Attributes\PathParameter;
 use Illuminate\Http\JsonResponse;
 
 // Metadata pre Scramble zaradia statisticke endpointy do spolocnej sekcie dokumentacie.
-#[Group('Statistics', 'Statistiky pouzivania animacii')]
+#[Group('Statistics', 'Štatistiky používania animácií')]
 class StatisticsController extends Controller
 {
     // Endpoint vrati pocty pouziti jednotlivych animacii.
-    #[Endpoint(title: 'Suhrn pouziti animacii', description: 'Vrati agregovany pocet spusteni pre kazdy typ animacie.')]
+    #[Endpoint(title: 'Súhrn použití animácií', description: 'Vráti agregovaný počet spustení pre každý typ animácie.')]
     public function summary(): JsonResponse
     {
         $summary = AnimationUsage::query()
@@ -29,8 +29,8 @@ class StatisticsController extends Controller
     }
 
     // Endpoint vrati detailne zaznamy pre jeden typ animacie.
-    #[Endpoint(title: 'Detail pouzitia konkretnej animacie', description: 'Vrati jednotlive zaznamy pouzitia pre vybrany typ animacie.')]
-    #[PathParameter('animationType', description: 'Typ animacie.', type: 'string', example: 'ball_beam')]
+    #[Endpoint(title: 'Detail použitia konkrétnej animácie', description: 'Vráti jednotlivé záznamy použitia pre vybraný typ animácie.')]
+    #[PathParameter('animationType', description: 'Typ animácie.', type: 'string', example: 'ball_beam')]
     public function details(string $animationType): JsonResponse
     {
         $usages = AnimationUsage::query()

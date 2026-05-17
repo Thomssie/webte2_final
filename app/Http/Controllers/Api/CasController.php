@@ -17,12 +17,12 @@ use Illuminate\Support\Str;
 
 
 // Metadata pre Scramble zaradia CAS endpointy do spolocnej sekcie dokumentacie.
-#[Group('CAS', 'CAS prikazy v Octave, historia a logy')]
+#[Group('CAS', 'CAS príkazy v Octave, história a logy')]
 class CasController extends Controller
 {
     // Endpoint spusti prikaz v Octave a pouzije historiu prikazov aktualnej relacie.
-    #[Endpoint(title: 'Spustenie prikazu v Octave', description: 'Spusti prikaz spolu s historiou aktualnej relacie, aby bolo mozne pouzivat pomocne premenne.')]
-    #[HeaderParameter('Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
+    #[Endpoint(title: 'Spustenie príkazu v Octave', description: 'Spustí príkaz spolu s históriou aktuálnej relácie, aby bolo možné používať pomocné premenné.')]
+    #[HeaderParameter('Session-Token', description: 'Identifikátor CAS relácie.', required: false, type: 'string', default: 'default-session')]
     public function execute(Request $request, OctaveService $octave): JsonResponse
     {
         $validated = $request->validate([
@@ -95,8 +95,8 @@ class CasController extends Controller
     }
 
     // Endpoint vymaze historiu prikazov pre aktualnu CAS relaciu.
-    #[Endpoint(title: 'Vymazanie historie aktualnej relacie', description: 'Odstrani ulozene prikazy patriace k zadanemu session tokenu.')]
-    #[HeaderParameter('Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
+    #[Endpoint(title: 'Vymazanie histórie aktuálnej relácie', description: 'Odstráni uložené príkazy patriace k zadanému session tokenu.')]
+    #[HeaderParameter('Session-Token', description: 'Identifikátor CAS relácie.', required: false, type: 'string', default: 'default-session')]
     public function resetHistory(Request $request): JsonResponse
     {
         $sessionToken = (string) $request->header('Session-Token', 'default-session');
@@ -120,8 +120,8 @@ class CasController extends Controller
 
 
     // Endpoint vrati prikazy ulozene v historii aktualnej CAS relacie.
-    #[Endpoint(title: 'Zoznam prikazov v historii relacie', description: 'Vrati prikazy ulozene pod zadanym session tokenom v poradi ich vykonania.')]
-    #[HeaderParameter('Session-Token', description: 'Identifikator CAS relacie.', required: false, type: 'string', default: 'default-session')]
+    #[Endpoint(title: 'Zoznam príkazov v histórii relácie', description: 'Vráti príkazy uložené pod zadaným session tokenom v poradí ich vykonania.')]
+    #[HeaderParameter('Session-Token', description: 'Identifikátor CAS relácie.', required: false, type: 'string', default: 'default-session')]
     public function history(Request $request): JsonResponse
     {
         $sessionToken = (string) $request->header('Session-Token', 'default-session');
@@ -138,9 +138,9 @@ class CasController extends Controller
 
 
     // Endpoint vrati CAS logy bud s limitom, alebo kompletne pri parametri all.
-    #[Endpoint(title: 'Zoznam logov CAS poziadaviek', description: 'Vrati logy poziadaviek spracovanych cez CAS a simulacne endpointy.')]
-    #[QueryParameter('all', description: 'Ak je true, vrati vsetky logy bez limitu.', required: false, type: 'bool')]
-    #[QueryParameter('limit', description: 'Maximalny pocet logov pri beznom vypise.', required: false, type: 'int', default: 50)]
+    #[Endpoint(title: 'Zoznam logov CAS požiadaviek', description: 'Vráti logy požiadaviek spracovaných cez CAS a simulačné endpointy.')]
+    #[QueryParameter('all', description: 'Ak je true, vráti všetky logy bez limitu.', required: false, type: 'bool')]
+    #[QueryParameter('limit', description: 'Maximálny počet logov pri bežnom výpise.', required: false, type: 'int', default: 50)]
     public function logs(Request $request): JsonResponse
     {
         $query = CasLog::query()->latest();
@@ -197,7 +197,7 @@ class CasController extends Controller
     }
 
     // Endpoint exportuje CAS logy do CSV suboru.
-    #[Endpoint(title: 'Export logov do CSV', description: 'Vrati CSV subor so vsetkymi ulozenymi CAS logmi.')]
+    #[Endpoint(title: 'Export logov do CSV', description: 'Vráti CSV súbor so všetkými uloženými CAS logmi.')]
     public function exportLogs()
     {
         $fileName = 'cas_logs_' . now()->format('Y-m-d_H-i-s') . '.csv';

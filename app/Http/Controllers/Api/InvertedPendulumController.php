@@ -13,12 +13,12 @@ use App\Services\AnimationUsageService;
 use App\Services\IpGeolocationService;
 
 // Metadata pre Scramble zaradia simulacny endpoint do sekcie simulacii.
-#[Group('Simulations', 'Vypocty dat pre synchronizovane animacie')]
+#[Group('Simulations', 'Výpočty dát pre synchronizované animácie')]
 class InvertedPendulumController extends Controller
 {
     // Spracuje poziadavku na vypocet simulacie inverzneho kyvadla cez Octave.
     // Pouziva sa v routes/api.php pre endpoint POST /api/simulations/inverted-pendulum.
-    #[Endpoint(title: 'Vypocet simulacie inverzneho kyvadla', description: 'Vrati cas, polohu a uhol pre animaciu inverzneho kyvadla.')]
+    #[Endpoint(title: 'Výpočet simulácie inverzného kyvadla', description: 'Vráti čas, polohu a uhol pre animáciu inverzného kyvadla.')]
     public function simulate(
         Request $request,
         OctaveService $octave,
@@ -27,14 +27,18 @@ class InvertedPendulumController extends Controller
     ): JsonResponse
     {
         $validated = $request->validate([
-            'initial_position' => ['required', 'numeric', 'min:-2', 'max:2'],
+            'initial_position' => ['required', 'numeric', 'min:-100', 'max:100'],
+            'initial_velocity' => ['sometimes', 'numeric', 'min:-10', 'max:10'],
             'initial_angle' => ['required', 'numeric', 'min:-45', 'max:45'],
-            'target_position' => ['required', 'numeric', 'min:-2', 'max:2'],
+            'initial_angular_velocity' => ['sometimes', 'numeric', 'min:-10', 'max:10'],
+            'target_position' => ['required', 'numeric', 'min:-100', 'max:100'],
             'duration' => ['required', 'numeric', 'min:1', 'max:30'],
         ]);
 
         $initialPosition = (float) $validated['initial_position'];
+        $initialVelocity = (float) ($validated['initial_velocity'] ?? 0);
         $initialAngle = deg2rad((float) $validated['initial_angle']);
+        $initialAngularVelocity = (float) ($validated['initial_angular_velocity'] ?? 0);
         $targetPosition = (float) $validated['target_position'];
         $duration = (float) $validated['duration'];
 
@@ -64,7 +68,7 @@ sys = ss(Ac,B*N,C,D);
 t = 0:0.05:{$duration};
 r = {$targetPosition};
 
-[y,t,x] = lsim(sys,r*ones(size(t)),t,[{$initialPosition};0;{$initialAngle};0]);
+[y,t,x] = lsim(sys,r*ones(size(t)),t,[{$initialPosition};{$initialVelocity};{$initialAngle};{$initialAngularVelocity}]);
 
 for i = 1:length(t)
     printf("%.5f,%.8f,%.8f\\n", t(i), y(i,1), y(i,2));

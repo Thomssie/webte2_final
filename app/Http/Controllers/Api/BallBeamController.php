@@ -13,12 +13,12 @@ use App\Services\AnimationUsageService;
 use App\Services\IpGeolocationService;
 
 // Metadata pre Scramble zaradia simulacny endpoint do sekcie simulacii.
-#[Group('Simulations', 'Vypocty dat pre synchronizovane animacie')]
+#[Group('Simulations', 'Výpočty dát pre synchronizované animácie')]
 class BallBeamController extends Controller
 {
     // Spracuje poziadavku na vypocet simulacie gulicky na tyci cez Octave.
     // Pouziva sa v routes/api.php pre endpoint POST /api/simulations/ball-beam.
-    #[Endpoint(title: 'Vypocet simulacie gulicky na tyci', description: 'Vrati cas, polohu a uhol pre animaciu gulicky na tyci.')]
+    #[Endpoint(title: 'Výpočet simulácie guličky na tyči', description: 'Vráti čas, polohu a uhol pre animáciu guličky na tyči.')]
     public function simulate(
         Request $request,
         OctaveService $octave,
@@ -28,8 +28,9 @@ class BallBeamController extends Controller
     {
         $validated = $request->validate([
             'initial_position' => ['required', 'numeric', 'min:-0.5', 'max:0.5'],
-            'initial_velocity' => ['sometimes', 'numeric'],
-            'initial_angle' => ['sometimes', 'numeric'],
+            'initial_velocity' => ['sometimes', 'numeric', 'min:-5', 'max:5'],
+            'initial_angle' => ['sometimes', 'numeric', 'min:-45', 'max:45'],
+            'initial_angular_velocity' => ['sometimes', 'numeric', 'min:-10', 'max:10'],
             'target_position' => ['required', 'numeric', 'min:-0.5', 'max:0.5'],
             'duration' => ['required', 'numeric', 'min:1', 'max:30'],
         ]);
@@ -37,6 +38,7 @@ class BallBeamController extends Controller
         $initialPosition = (float) $validated['initial_position'];
         $initialVelocity = (float) ($validated['initial_velocity'] ?? 0);
         $initialAngle = deg2rad((float) ($validated['initial_angle'] ?? 0));
+        $initialAngularVelocity = (float) ($validated['initial_angular_velocity'] ?? 0);
         $targetPosition = (float) $validated['target_position'];
         $duration = (float) $validated['duration'];
 
@@ -59,7 +61,7 @@ sys = ss(A-B*K,B*N,C,D);
 
 t = 0:0.01:{$duration};
 r = {$targetPosition};
-[y,t,x] = lsim(sys,r*ones(size(t)),t,[{$initialPosition};{$initialVelocity};{$initialAngle};0]);
+[y,t,x] = lsim(sys,r*ones(size(t)),t,[{$initialPosition};{$initialVelocity};{$initialAngle};{$initialAngularVelocity}]);
 
 for i = 1:length(t)
     printf("%.5f,%.8f,%.8f\\n", t(i), y(i), x(i,3));

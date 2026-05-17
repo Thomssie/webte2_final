@@ -2,6 +2,8 @@
     --app-accent: #57C4CE;
     --app-accent-dark: #2F9FA8;
     --app-accent-soft: #E7F8FA;
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
     background: #F6F6F8;
     color: #111827;
@@ -211,6 +213,14 @@
     width: min(1100px, calc(100% - 32px));
     margin: 0 auto;
     padding: 28px 0 32px;
+    flex: 1;
+}
+
+.app-footer {
+    padding: 18px 16px 24px;
+    color: #6b7280;
+    font-size: 13px;
+    text-align: center;
 }
 
 @media (max-width: 760px) {

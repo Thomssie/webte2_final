@@ -104,12 +104,68 @@
 
 .pendulum-track {
     position: absolute;
-    left: 8%;
-    right: 8%;
+    left: 0;
+    right: 0;
     bottom: 64px;
     height: 6px;
     border-radius: 999px;
     background: #111827;
+}
+
+.pendulum-scale {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 26px;
+    height: 42px;
+    pointer-events: none;
+}
+
+.pendulum-scale-tick {
+    position: absolute;
+    bottom: 20px;
+    width: 1px;
+    height: 10px;
+    background: #9ca3af;
+    transform: translateX(-50%);
+}
+
+.pendulum-scale-tick-major {
+    height: 18px;
+    background: #374151;
+}
+
+.pendulum-scale-tick span {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    color: #6b7280;
+    font-size: 11px;
+    white-space: nowrap;
+    transform: translateX(-50%);
+}
+
+.pendulum-target-marker {
+    position: absolute;
+    bottom: 58px;
+    width: 2px;
+    height: 28px;
+    border-radius: 999px;
+    background: #f97316;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.pendulum-target-marker::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #f97316;
+    transform: translateX(-50%);
 }
 
 .pendulum-cart {

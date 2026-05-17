@@ -29,7 +29,7 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => 'REST API pre CAS vypocty, simulacie dynamickych systemov, logy a statistiky.',
+        'description' => 'REST API pre CAS výpočty, simulácie dynamických systémov, logy a štatistiky.',
     ],
 
     /*

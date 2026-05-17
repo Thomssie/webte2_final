@@ -24,7 +24,7 @@ class ApiDocumentationPdfController extends Controller
         $specification = $translator->translate($openApi->specification($generator), $language);
         $documentTitle = $language === 'en'
             ? 'TomTib Lab API documentation'
-            : 'TomTib Lab API dokumentacia';
+            : 'TomTib Lab API dokumentácia';
 
         $html = view('pdf.api-docs', [
             'documentTitle' => $documentTitle,

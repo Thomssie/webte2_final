@@ -49,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
             $openApi->secure(
                 SecurityScheme::apiKey('header', 'API-Key')
                     ->as('ApiKeyAuth')
-                    ->setDescription('API kluc definovany v konfiguracii aplikacie.')
+                    ->setDescription('API kľúč definovaný v konfigurácii aplikácie.')
             );
         });
     }

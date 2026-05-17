@@ -4,6 +4,18 @@
     padding: 24px;
 }
 
+.logs-page {
+    max-width: 1100px;
+}
+
+.logs-page > div:first-child {
+    text-align: center;
+}
+
+.logs-page .cas-actions {
+    justify-content: center;
+}
+
 .cas-title {
     font-size: 32px;
     font-weight: 700;
@@ -66,6 +78,16 @@
     opacity: 0.6;
 }
 
+.cas-button-secondary {
+    background: #ffffff;
+    color: var(--app-accent-dark);
+}
+
+.cas-button-secondary:hover {
+    background: var(--app-accent-soft);
+    color: var(--app-accent-dark);
+}
+
 .cas-output {
     margin-top: 24px;
     padding: 16px;
@@ -110,4 +132,84 @@
     background: var(--app-accent-soft);
     font-family: monospace;
     overflow-wrap: anywhere;
+}
+
+.logs-table-panel {
+    margin-top: 24px;
+}
+
+.logs-table-wrap {
+    overflow-x: auto;
+    border: 1px solid rgba(87, 196, 206, 0.35);
+    border-radius: 18px;
+    background: #ffffff;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 860px;
+    font-size: 14px;
+}
+
+.logs-table th,
+.logs-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+    text-align: left;
+    vertical-align: top;
+}
+
+.logs-table th {
+    color: var(--app-accent-dark);
+    font-weight: 700;
+    background: var(--app-accent-soft);
+}
+
+.logs-sort-button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.logs-sort-button:hover {
+    color: #111827;
+}
+
+.logs-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.logs-table code {
+    display: -webkit-box;
+    max-width: 300px;
+    color: #111827;
+    font-family: monospace;
+    overflow-wrap: anywhere;
+    overflow: hidden;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.logs-status {
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.logs-status.is-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.logs-status.is-error {
+    background: #fee2e2;
+    color: #991b1b;
 }
