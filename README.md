@@ -1,3 +1,17 @@
+# Webová aplikácia TomTib Lab
+
+## Predstavenie a postup práce
+
+- Video s predstavením webovej aplikácie: [YouTube](https://www.youtube.com/watch?v=GKwxXNw8iCo)
+- GitHub repozitár s kompletným postupom práce: [Thomssie/webte2_final](https://github.com/Thomssie/webte2_final)
+
+## Rozdelenie práce
+
+| Meno | Hlavné úlohy |
+|---|---|
+| Tibor Vnuk | - inverzné kyvadlo + frontend animácie a grafy<br>- backend výpočty pre simuláciu inverzného kyvadla<br>- logovanie používateľských/CAS aktivít<br>- export logov do CSV<br>- OpenAPI dokumentácia<br>- generovanie PDF dokumentácie<br>- CSRF zabezpečenie web požiadaviek<br>- úprava aplikácie pre nasadenie v podadresári /webte_final<br>- nasadenie aplikácie na školský server<br>- serverová dokumentácia nasadenia |
+| Tomáš Kmiť | - založenie projektu Laravel + Inertia + React<br>- prepojenie aplikácie s GNU Octave<br>- CAS konzola so syntax highlightingom<br>- uchovávanie premenných medzi CAS výpočtami<br>- gulička na tyči + frontend animácie a grafy<br>- dvojjazyčné rozhranie SK/EN<br>- responzívny layout a navigácia aplikácie<br>- štatistiky používania animácií<br>- Docker konfigurácia<br>- vytvorenie prezentačného videa |
+
 # Nasadenie na server node90
 
 Projekt sme nasadili na adresu:
