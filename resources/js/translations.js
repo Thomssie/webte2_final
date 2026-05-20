@@ -285,7 +285,7 @@ const translations = {
             uses: 'Použitia',
             details: 'Detaily',
             hideDetails: 'Skryť detaily',
-            refresh: 'Refresh',
+            refresh: 'Obnoviť',
             loading: 'Načítavam...',
             noRecords: 'Zatiaľ žiadne záznamy.',
             usedAt: 'Použité',

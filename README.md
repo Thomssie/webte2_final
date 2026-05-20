@@ -183,3 +183,39 @@ php8.4 artisan view:cache
 sudo systemctl reload php8.4-fpm
 sudo systemctl reload nginx
 ```
+
+
+
+
+# Docker spustenie
+
+Aplikácia je kontajnerizovaná pomocou Dockeru
+
+## Požiadavky
+
+Na spustenie je potrebné mať nainštalované:
+
+- Docker
+- Docker Compose
+
+## Spustenie projektu
+
+V koreňovom priečinku projektu spustite:
+
+```bash
+cp .env.docker .env
+docker compose up -d --build
+docker compose exec app composer install
+docker compose exec app php artisan key:generate --force
+docker compose exec app npm ci
+docker compose exec app npm run build
+docker compose exec app php artisan migrate --force
+docker compose exec app php artisan optimize:clear
+```
+
+Prvé spustenie môže trvať niekoľko minút, pretože sa inštalujú PHP a JavaScript závislosti a buildujú sa frontend assety.
+
+Po úspešnom spustení bude aplikácia dostupná na adrese:
+```bash
+http://localhost:8080
+```
